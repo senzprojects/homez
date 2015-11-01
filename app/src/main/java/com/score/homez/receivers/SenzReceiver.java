@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.score.senzc.pojos.Senz;
+
 
 /**
  * Broadcast receiver to receive senz messages which broadcast from SenzService
@@ -19,7 +21,7 @@ public class SenzReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         // extract broadcasting senz
         String action = intent.getAction();
-        //Senz senz = intent.getExtras().getParcelable("SENZ");
+        Senz senz = intent.getExtras().getParcelable("SENZ");
 
         // handler senz from here
 
