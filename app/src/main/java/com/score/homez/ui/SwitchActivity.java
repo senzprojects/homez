@@ -16,7 +16,7 @@ import com.score.homez.R;
 import com.score.senz.ISenzService;
 
 /**
- * Created by eranga on 11/1/15.
+ * Switch activity
  */
 public class SwitchActivity extends Activity {
 
