@@ -1,4 +1,4 @@
-package com.score.homez;
+package com.score.homez.ui;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.score.homez.R;
 import com.score.senz.ISenzService;
 
 
@@ -71,7 +72,9 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v == nightMode) {
-
+            Intent mapIntent = new Intent(this, SwitchActivity.class);
+            startActivity(mapIntent);
+            overridePendingTransition(R.anim.right_in, R.anim.stay_in);
         } else if (v == visitorMode) {
 
         }
