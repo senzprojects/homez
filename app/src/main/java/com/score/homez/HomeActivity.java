@@ -5,23 +5,27 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.score.senz.ISenzService;
-import com.score.senzc.enums.SenzTypeEnum;
-import com.score.senzc.pojos.Senz;
-import com.score.senzc.pojos.User;
 
-import java.util.HashMap;
 
-public class HomeActivity extends Activity {
+public class HomeActivity extends Activity implements View.OnClickListener {
 
-    Button connect;
+    // we use custom font here
+    private Typeface typeface;
+
+    // layout components
+    private RelativeLayout nightMode;
+    private RelativeLayout visitorMode;
+    private TextView nightModeText;
+    private TextView visitorModeText;
 
     // service interface
     private ISenzService senzService = null;
@@ -39,28 +43,17 @@ public class HomeActivity extends Activity {
         }
     };
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = new Intent();
-        intent.setClassName("com.score.senz", "com.score.senz.services.RemoteSenzService");
-        bindService(intent, senzServiceConnection, Context.BIND_AUTO_CREATE);
-
-        Log.d("TAG", "Bound service");
-
-        connect = (Button) findViewById(R.id.connect);
-        connect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    senzService.send(new Senz("Id", "signature", SenzTypeEnum.PUT, null, new User("id", "era"), new HashMap<String, String>()));
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        initUi();
+        setupActionBar();
+        bindSenzService();
     }
 
     /**
@@ -70,6 +63,60 @@ public class HomeActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(senzServiceConnection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onClick(View v) {
+        if (v == nightMode) {
+
+        } else if (v == visitorMode) {
+
+        }
+    }
+
+    /**
+     * Initialize UI components
+     */
+    private void initUi() {
+        typeface = Typeface.createFromAsset(getAssets(), "fonts/vegur_2.otf");
+
+        nightMode = (RelativeLayout) findViewById(R.id.night_mode);
+        visitorMode = (RelativeLayout) findViewById(R.id.visitor_mode);
+        nightMode.setOnClickListener(this);
+        visitorMode.setOnClickListener(this);
+
+        nightModeText = (TextView) findViewById(R.id.night_mode_text);
+        visitorModeText = (TextView) findViewById(R.id.visitor_mode_text);
+        nightModeText.setTypeface(typeface, Typeface.BOLD);
+        visitorModeText.setTypeface(typeface, Typeface.BOLD);
+    }
+
+    /**
+     * Set up action bar
+     */
+    private void setupActionBar() {
+        // enable ActionBar app icon to behave as action to toggle nav drawer
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+
+        int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
+        TextView yourTextView = (TextView) findViewById(titleId);
+        yourTextView.setTextColor(getResources().getColor(R.color.white));
+        yourTextView.setTypeface(typeface);
+
+        getActionBar().setTitle("Switch board");
+    }
+
+    /**
+     * Bind with senz service
+     */
+    private void bindSenzService() {
+        Intent intent = new Intent();
+        intent.setClassName("com.score.senz", "com.score.senz.services.RemoteSenzService");
+        bindService(intent, senzServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
 }
