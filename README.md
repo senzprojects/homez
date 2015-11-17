@@ -1,4 +1,4 @@
-# homez
+# HomeZ
 Smart home application with SenZ platform
 
 # How to install
