@@ -8,11 +8,14 @@ import android.content.ServiceConnection;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
+import com.score.homez.db.DBSource;
 import com.score.homez.R;
 import com.score.senz.ISenzService;
 
@@ -22,11 +25,19 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     // we use custom font here
     private Typeface typeface;
 
+
+    private final Spanned night_on = Html.fromHtml("<font size='3' color='black'>Night Mode [</font><font size='3' color='green'>ON</font><font size='3' color='black'>]</font>");
+    private  final Spanned night_off = Html.fromHtml("<font size='3' color='black'>Night Mode [</font><font size='3' color='red'>OFF</font><font size='3' color='black'>]</font>");
+    private  final Spanned visitor_on = Html.fromHtml("<font size='3' color='black'>Visitor Mode [</font><font size='3' color='green'>ON</font><font size='3' color='black'>]</font>");
+    private final Spanned visitor_off = Html.fromHtml("<font size='3' color='black'>Visitor Mode [</font><font size='3' color='red'>OFF</font><font size='3' color='black'>]</font>");
+
     // layout components
-    private RelativeLayout nightMode;
-    private RelativeLayout visitorMode;
     private TextView nightModeText;
     private TextView visitorModeText;
+    private ToggleButton nightModeButton;
+    private ToggleButton visitorModeButton;
+
+    DBSource dbSource;
 
     // service interface
     private ISenzService senzService = null;
@@ -55,6 +66,27 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         initUi();
         setupActionBar();
         bindSenzService();
+        dbSource = new DBSource(getApplicationContext());
+
+
+        if(1 == dbSource.getStatus("GPIO_1")){
+            nightModeButton.setChecked(true);
+            nightModeText.setText(night_on);
+        }
+        else{
+            nightModeButton.setChecked(false);
+            nightModeText.setText(night_off);
+        }
+
+        if(1 == dbSource.getStatus("GPIO_2")){
+            visitorModeButton.setChecked(true);
+            visitorModeText.setText(visitor_on);
+        }
+        else{
+            visitorModeButton.setChecked(false);
+            visitorModeText.setText(visitor_off);
+        }
+
     }
 
     /**
@@ -70,15 +102,32 @@ public class HomeActivity extends Activity implements View.OnClickListener {
      * {@inheritDoc}
      */
     @Override
-    public void onClick(View v) {
-        if (v == nightMode) {
-            Intent mapIntent = new Intent(this, SwitchActivity.class);
-            startActivity(mapIntent);
-            overridePendingTransition(R.anim.right_in, R.anim.stay_in);
-        } else if (v == visitorMode) {
-
+    public void onClick(View tb) {
+        if (tb == nightModeButton) {
+            if(1==dbSource.getStatus("GPIO_1")){
+                nightModeButton.setChecked(false);
+                dbSource.setStatus("GPIO_1",0);
+                nightModeText.setText(night_off);
+            } else{
+                nightModeButton.setChecked(true);
+                dbSource.setStatus("GPIO_1",1);
+                nightModeText.setText(night_on);
+            }
+        }
+        else if(tb == visitorModeButton) {
+           if(1==dbSource.getStatus("GPIO_2")){
+               visitorModeButton.setChecked(false);
+               dbSource.setStatus("GPIO_2",0);
+               visitorModeText.setText(visitor_off);
+           }else{
+               visitorModeButton.setChecked(true);
+               dbSource.setStatus("GPIO_2",1);
+               visitorModeText.setText(visitor_on);
+           }
         }
     }
+
+
 
     /**
      * Initialize UI components
@@ -86,13 +135,15 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     private void initUi() {
         typeface = Typeface.createFromAsset(getAssets(), "fonts/vegur_2.otf");
 
-        nightMode = (RelativeLayout) findViewById(R.id.night_mode);
-        visitorMode = (RelativeLayout) findViewById(R.id.visitor_mode);
-        nightMode.setOnClickListener(this);
-        visitorMode.setOnClickListener(this);
+        nightModeText = (TextView)findViewById(R.id.text_night_mode);
+        visitorModeText =(TextView)findViewById(R.id.text_visitor_mode);
 
-        nightModeText = (TextView) findViewById(R.id.night_mode_text);
-        visitorModeText = (TextView) findViewById(R.id.visitor_mode_text);
+        nightModeButton = (ToggleButton)findViewById(R.id.switch_night_mode);
+        visitorModeButton = (ToggleButton)findViewById(R.id.switch_visitor_mode);
+
+        nightModeButton.setOnClickListener(this);
+        visitorModeButton.setOnClickListener(this);
+
         nightModeText.setTypeface(typeface, Typeface.BOLD);
         visitorModeText.setTypeface(typeface, Typeface.BOLD);
     }
@@ -121,5 +172,6 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         intent.setClassName("com.score.senz", "com.score.senz.services.RemoteSenzService");
         bindService(intent, senzServiceConnection, Context.BIND_AUTO_CREATE);
     }
+
 
 }
