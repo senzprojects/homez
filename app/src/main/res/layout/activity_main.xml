@@ -28,26 +28,26 @@
                 android:id="@+id/night_mode"
                 android:layout_weight="0.35">
                 <ToggleButton
-                    android:id="@+id/switch_button"
-                    android:layout_marginTop="20dp"
+                    android:id="@+id/switch_night_mode"
                     android:layout_width="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_height="wrap_content"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
-                    android:text=""
                     android:textOff=""
-                    android:textOn="" />
+                    android:textOn=""
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:textSize="30sp"
-                    android:layout_below="@+id/switch_button"
+                    android:layout_below="@+id/switch_night_mode"
                     android:layout_centerHorizontal="true"
-                    android:id="@+id/night_mode_text"
+                    android:id="@+id/text_night_mode"
                     android:text="Night Mode [ON]"
                     android:layout_marginTop="10dp"
                     android:textColor="#4a4a4a"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:editable="true" />
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -84,26 +84,26 @@
                 android:background="@drawable/switch_board_bg"
                 android:layout_weight="0.35">
                 <ToggleButton
-                    android:id="@+id/switch_button1"
-                    android:layout_marginTop="20dp"
+                    android:id="@+id/switch_visitor_mode"
                     android:layout_width="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_height="wrap_content"
                     android:background="@drawable/toggle_selector"
                     android:checked="false"
-                    android:text=""
                     android:textOff=""
-                    android:textOn="" />
+                    android:textOn=""
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:textSize="30sp"
                     android:layout_marginTop="10dp"
-                    android:layout_below="@+id/switch_button1"
+                    android:layout_below="@+id/switch_visitor_mode"
                     android:layout_centerHorizontal="true"
-                    android:id="@+id/visitor_mode_text"
+                    android:id="@+id/text_visitor_mode"
                     android:text="Visitor Mode [OFF]"
                     android:textColor="#4a4a4a"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:editable="false" />
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="match_parent"

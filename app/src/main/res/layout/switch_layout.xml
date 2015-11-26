@@ -21,7 +21,7 @@
             android:orientation="vertical">
 
             <ToggleButton
-                android:id="@+id/switch_button"
+                android:id="@+id/switch_night_mode"
                 android:layout_marginTop="20dp"
                 android:layout_width="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@+id/switch_button"
+                android:layout_below="@+id/switch_night_mode"
                 android:id="@+id/switch_text"
                 android:textSize="25sp"
                 android:text="Switched On"/>

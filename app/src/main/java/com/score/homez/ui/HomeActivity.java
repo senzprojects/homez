@@ -124,8 +124,8 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         nightMode.setOnClickListener(this);
         visitorMode.setOnClickListener(this);
 
-        nightModeText = (TextView) findViewById(R.id.night_mode_text);
-        visitorModeText = (TextView) findViewById(R.id.visitor_mode_text);
+        nightModeText = (TextView) findViewById(R.id.text_night_mode);
+        visitorModeText = (TextView) findViewById(R.id.text_visitor_mode);
         nightModeText.setTypeface(typeface, Typeface.BOLD);
         visitorModeText.setTypeface(typeface, Typeface.BOLD);
     }
