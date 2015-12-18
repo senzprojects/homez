@@ -106,7 +106,7 @@ public class SwitchActivity extends Activity {
      */
     private void bindSenzService() {
         Intent intent = new Intent();
-        intent.setClassName("com.score.senz", "com.score.senz.services.RemoteSenzService");
+        intent.setClassName("com.score.senzservices", "com.score.senzservices.services.RemoteSenzService");
         bindService(intent, senzServiceConnection, Context.BIND_AUTO_CREATE);
     }
 

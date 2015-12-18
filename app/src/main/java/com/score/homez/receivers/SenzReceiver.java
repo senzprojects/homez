@@ -21,6 +21,7 @@ public class SenzReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // extract broadcasting senz
+
         Senz senz = intent.getExtras().getParcelable("SENZ");
 
         Log.d(TAG, "Broadcast Senz received from" + senz.getSender());

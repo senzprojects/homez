@@ -20,7 +20,7 @@ public class DBHelper extends SQLiteOpenHelper {
             "CREATE TABLE "+DBContract.Switch.TABLE_NAME+" ("+
             DBContract.Switch._ID + " INTEGER PRIMARY KEY AUTOINCREMENT"+", "+
             DBContract.Switch.COLUMN_NAME_NAME +" TEXT NOT NULL, "+
-            DBContract.Switch.COLUMN_NAME_STATUS+" INT(1) NOT NULL DEFAULT 0"+
+            DBContract.Switch.COLUMN_NAME_STATUS+" INT NOT NULL DEFAULT 0"+
                     ")";
 
     private static final String SQL_DELETE_HOMEZ =

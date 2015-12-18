@@ -3,4 +3,10 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="new_senz">New Senz</string>
+    <string name="night_off">Html.fromHtml("<font color='#4a4a4a'>Night Mode </font> <font color='#eada00'>[ON]</font>")</string>
+    <string name="night_on"><html><font color='#4a4a4a'>Night Mode </font> <font color='#eada00'>[ON]</font></html></string>
+    <string name="visitor_off"><html><font color='#4a4a4a'>Visitor Mode </font> <font color='red'>[OFF]</font></html></string>
+    <string name="visitor_on"><html><font color='#4a4a4a'>Visitor Mode </font> <font color='#eada00'>[ON]</font></html></string>
+
 </resources>

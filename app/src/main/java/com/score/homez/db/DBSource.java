@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 /**
  * Created by namal on 11/16/15.
  */
@@ -41,7 +43,7 @@ public class DBSource {
         db.close();
     }
 
-    public void setStatus(String name, int status) {
+    public void setStatus(String name,int status) {
         Log.d(TAG, "setStatus : setting status - " + name + " - " + Integer.toString(status));
         SQLiteDatabase db=DBHelper.getInstance(context).getWritableDatabase();
 
@@ -53,7 +55,7 @@ public class DBSource {
 
     }
 
-    public int getStatus(String name){
+    public int getStatus(String name){ //ToDo :early added if not exist create before get, functionality is still exist and seems not nessecerry any more
         Log.d(TAG, "get Status : gettng status - " + name);
         SQLiteDatabase db =new  DBHelper(context).getReadableDatabase();
 
@@ -78,6 +80,31 @@ public class DBSource {
             Log.d(TAG, "havent switch : so create - " + name+ " status - "+status);
             return status;
         }
+    }
+
+    public ArrayList<String> getSwitches(){
+        Log.d(TAG, "get all switches from DB ");
+        SQLiteDatabase db =new  DBHelper(context).getReadableDatabase();
+
+        ArrayList<String> data= new ArrayList<String>();
+
+        Cursor cursor = db.query(DBContract.Switch.TABLE_NAME,
+                new String[]{DBContract.Switch.COLUMN_NAME_NAME},null,//where colomn=value
+                null,
+                null,   //groupby
+                null,  //having
+                null    //orderby
+        );
+
+        if(cursor.moveToFirst()) {
+            cursor.moveToFirst();
+            do {
+                data.add(cursor.getString(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_NAME)));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return data;
     }
 
 

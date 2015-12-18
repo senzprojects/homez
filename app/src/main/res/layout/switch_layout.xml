@@ -28,7 +28,6 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/toggle_selector"
                 android:checked="false"
-                android:text=""
                 android:textOff=""
                 android:textOn="" />
 

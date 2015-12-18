@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -16,31 +17,41 @@ import android.os.RemoteException;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.score.homez.R;
 import com.score.homez.db.DBSource;
 import com.score.homez.utils.ActivityUtils;
+import com.score.homez.utils.NetworkUtil;
 import com.score.senz.ISenzService;
 import com.score.senzc.enums.SenzTypeEnum;
 import com.score.senzc.pojos.Senz;
 import com.score.senzc.pojos.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 
-public class HomeActivity extends Activity implements View.OnClickListener {
+public class  HomeActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG = HomeActivity.class.getName();
 
+    //put message variables
+    private String lastSwitch;
+    private  String lastStatus;
+
     // use to track share timeout
     private SenzCountDownTimer senzCountDownTimer;
-    private boolean isResponseReceived;
+    private boolean isResponseReceivedPut;
+    private boolean isResponseReceivedGet;
 
     // we use custom font here
     private Typeface typeface;
@@ -71,7 +82,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
 
         public void onServiceDisconnected(ComponentName className) {
             senzService = null;
-            Log.d("TAG", "Disconnected from senz service");
+            Log.d(TAG, "Disconnected from senz service");
         }
     };
 
@@ -81,31 +92,37 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
-        registerReceiver(senzMessageReceiver, new IntentFilter("DATA"));
+        registerReceiver(senzMessageReceiver, new IntentFilter("com.score.senzc.DATA"));
         senzCountDownTimer = new SenzCountDownTimer(16000, 5000);
-        isResponseReceived = false;
+        isResponseReceivedPut = true;
+        isResponseReceivedGet = true;
 
         initUi();
         setupActionBar();
         bindSenzService();
         dbSource = new DBSource(getApplicationContext());
+        if(NetworkUtil.isAvailableNetwork(this)){
+            if(dbSource.getSwitches().size()>0) {
+                isResponseReceivedGet = false;
+                senzCountDownTimer.start();
 
-        if (1 == dbSource.getStatus("GPIO_1")) {
-            nightModeButton.setChecked(true);
-            nightModeText.setText(night_on);
-        } else {
-            nightModeButton.setChecked(false);
-            nightModeText.setText(night_off);
+            } else {
+                Toast toast = Toast.makeText(this.getBaseContext(), "SHARE Your Smart Home Switches to this device Before use", Toast.LENGTH_LONG);
+                toast.getView().setBackgroundColor(Color.RED);
+                toast.setGravity(Gravity.TOP, 0, 70);
+                toast.getView().setPadding(10, 10, 10, 10);
+                TextView text = (TextView) toast.getView().findViewById(android.R.id.message);
+                text.setTextColor(Color.WHITE);
+                text.setTextSize(18);
+                toast.show();
+            }
+
         }
-
-        if (1 == dbSource.getStatus("GPIO_2")) {
-            visitorModeButton.setChecked(true);
-            visitorModeText.setText(visitor_on);
-        } else {
-            visitorModeButton.setChecked(false);
-            visitorModeText.setText(visitor_off);
+        else {
+            Toast.makeText(this,"No Network Connection Available",Toast.LENGTH_LONG).show();
         }
 
     }
@@ -125,30 +142,53 @@ public class HomeActivity extends Activity implements View.OnClickListener {
      */
     @Override
     public void onClick(View tb) {
-        if (tb == nightModeButton) {
-            if (1 == dbSource.getStatus("GPIO_1")) {
-                nightModeButton.setChecked(false);
-                dbSource.setStatus("GPIO_1", 0);
-                nightModeText.setText(night_off);
+
+        if(NetworkUtil.isAvailableNetwork(this)) {
+
+            if (dbSource.getSwitches().size() > 0) {
+
+                if (tb == nightModeButton) {
+                    if (1 == dbSource.getStatus("s1")) {
+                        lastSwitch = "s1";//ToDo check only swith instead of db for if
+                        lastStatus = "off";
+                        isResponseReceivedPut = false;
+                        senzCountDownTimer.start();
+                    } else {
+                        lastSwitch = "s1";
+                        lastStatus = "on";
+                        isResponseReceivedPut = false;
+                        senzCountDownTimer.start();
+                    }
+                } else if (tb == visitorModeButton) {
+                    if (1 == dbSource.getStatus("s2")) {
+                        lastSwitch = "s2";
+                        lastStatus = "off";
+                        isResponseReceivedPut = false;
+                        senzCountDownTimer.start();
+                    } else {
+                        lastSwitch = "s2";
+                        lastStatus = "on";
+                        isResponseReceivedPut = false;
+                        senzCountDownTimer.start();
+                    }
+                }
             } else {
-                nightModeButton.setChecked(true);
-                dbSource.setStatus("GPIO_1", 1);
-                nightModeText.setText(night_on);
-            }
-        } else if (tb == visitorModeButton) {
-            if (1 == dbSource.getStatus("GPIO_2")) {
-                visitorModeButton.setChecked(false);
-                dbSource.setStatus("GPIO_2", 0);
-                visitorModeText.setText(visitor_off);
-            } else {
-                visitorModeButton.setChecked(true);
-                dbSource.setStatus("GPIO_2", 1);
-                visitorModeText.setText(visitor_on);
+                Toast toast = Toast.makeText(this.getBaseContext(), "SHARE Your Smart Home Switches to this device Before use", Toast.LENGTH_LONG);
+                toast.getView().setBackgroundColor(Color.RED);
+                toast.setGravity(Gravity.TOP, 0, 70);
+                toast.getView().setPadding(10, 10, 10, 10);
+                TextView text = (TextView) toast.getView().findViewById(android.R.id.message);
+                text.setTextColor(Color.WHITE);
+                text.setTextSize(18);
+                toast.show();
+
             }
         }
+        else{
+            Toast.makeText(this,"No Network Conection Available",Toast.LENGTH_LONG).show();
+        }
     }
-
-    /**
+    /**     }
      * Initialize UI components
      */
     private void initUi() {
@@ -188,7 +228,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
      */
     private void bindSenzService() {
         Intent intent = new Intent();
-        intent.setClassName("com.score.senz", "com.score.senz.services.RemoteSenzService");
+        intent.setClassName("com.score.senzservices", "com.score.senzservices.services.RemoteSenzService");
         bindService(intent, senzServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -204,9 +244,15 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         @Override
         public void onTick(long millisUntilFinished) {
             // if response not received yet, resend share
-            if (!isResponseReceived) {
+            if (!isResponseReceivedPut) {
+                ActivityUtils.showProgressDialog(HomeActivity.this,"Please wait ...");
                 put();
-                Log.d(TAG, "Response not received yet");
+                Log.d(TAG, "Put Response not received yet");
+            }
+            if (!isResponseReceivedGet) {
+                ActivityUtils.showProgressDialog(HomeActivity.this, "Please wait ...");
+                get();
+                Log.d(TAG, "Get Response not received yet");
             }
         }
 
@@ -215,9 +261,18 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             ActivityUtils.cancelProgressDialog();
 
             // display message dialog that we couldn't reach the user
-            if (!isResponseReceived) {
+            if (!isResponseReceivedPut) {//ToDo generalize String senzclient - Homep
                 String message = "<font color=#000000>Seems we couldn't reach the </font> <font color=#eada00>" + "<b>" + "Homep" + "</b>" + "</font> <font color=#000000> at this moment</font>";
-                displayInformationMessageDialog("#Share Fail", message);
+                displayInformationMessageDialog("#PUT Fail", message);
+                isResponseReceivedPut=true;
+                nightModeButton.setChecked(1==dbSource.getStatus("s1"));
+                visitorModeButton.setChecked(1==dbSource.getStatus("s2"));
+
+            }
+            if (!isResponseReceivedGet) {
+                String message = "<font color=#000000>Seems we couldn't reach the </font> <font color=#eada00>" + "<b>" + "Homep" + "</b>" + "</font> <font color=#000000> at this moment</font>";
+                displayInformationMessageDialog("#GET Fail", message);
+                isResponseReceivedGet=true;
             }
         }
     }
@@ -277,18 +332,64 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     private void handleMessage(Intent intent) {
         String action = intent.getAction();
 
-        if (action.equalsIgnoreCase("DATA")) {
+        if (action.equalsIgnoreCase("com.score.senzc.DATA")) {
             Senz senz = intent.getExtras().getParcelable("SENZ");
 
             if (senz.getAttributes().containsKey("msg")) {
                 // msg response received
                 ActivityUtils.cancelProgressDialog();
-                isResponseReceived = true;
                 senzCountDownTimer.cancel();
 
                 String msg = senz.getAttributes().get("msg");
+//                if (msg != null && msg.equalsIgnoreCase("PutDone")) {ToDo if msg is not equals
+//                    //onPostShare();
                 if (msg != null && msg.equalsIgnoreCase("PutDone")) {
-                    //onPostShare();
+                    Log.d(TAG, "DATA #msg PutDone Recieved");
+                    isResponseReceivedPut = true;
+                    for(Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
+                        String key = entry.getKey();
+                        int value;
+                        if(key.equals("s1")){
+                            value = Integer.parseInt(entry.getValue());
+                            dbSource.setStatus(key,value);
+                            nightModeButton.setChecked(1==dbSource.getStatus(key));
+                            if(1==value) nightModeText.setText(night_on);
+                            else nightModeText.setText(night_off);
+                        }
+                        if(key.equals("s2")){
+                            value = Integer.parseInt(entry.getValue());
+                            dbSource.setStatus(key,value);
+                            visitorModeButton.setChecked(1==value);
+                            if(1==value) visitorModeText.setText(visitor_on);
+                            else visitorModeText.setText(visitor_off);
+                        }
+                    }
+
+                }
+                else if (msg != null && msg.equalsIgnoreCase("GetResponse")) {
+                    isResponseReceivedGet = true;
+                    Toast.makeText(this.getBaseContext(), "Status Received", Toast.LENGTH_SHORT).show();
+                    for(Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
+                        String key = entry.getKey();
+                        int value;
+                        if(key.equals("s1")){
+                            //Log.d(TAG, "Get Response  === key   ;   vale  ==== "+key +" : "+entry.getValue());
+                            value = Integer.parseInt(entry.getValue());
+                            dbSource.setStatus(key,value);
+                            nightModeButton.setChecked(1==value);
+                            if(1==value) nightModeText.setText(night_on);
+                            else nightModeText.setText(night_off);
+                        }
+                        if(key.equals("s2")){
+                            //Log.d(TAG, "Get response === key   ;   vale ===== "+key +" : "+entry.getValue());
+                            value = Integer.parseInt(entry.getValue());
+                            dbSource.setStatus(key, value);
+                            visitorModeButton.setChecked(1 == value);
+                            if(1==value) visitorModeText.setText(visitor_on);
+                            else visitorModeText.setText(visitor_off);
+                        }
+                    }
+
                 } else {
                     String message = "<font color=#000000>Seems we couldn't PUT </font> <font color=#eada00>" + "<b>" + "gpio" + "</b>" + "</font>";
                     displayInformationMessageDialog("#Share Fail", message);
@@ -305,20 +406,48 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         try {
             // create senz attributes
             HashMap<String, String> senzAttributes = new HashMap<>();
-            senzAttributes.put("gpio", "on");
+            Log.d(TAG, "put ============ "+lastSwitch+"    :    "+lastStatus);
+            senzAttributes.put(lastSwitch, lastStatus);
             senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
 
             // new senz
             String id = "_ID";
             String signature = "_SIGNATURE";
-            SenzTypeEnum senzType = SenzTypeEnum.SHARE;
-            User receiver = new User("", "homep");
+            SenzTypeEnum senzType = SenzTypeEnum.PUT;
+            User receiver = new User("", "homepi");/////ToDo  Get user name from login details
             Senz senz = new Senz(id, signature, senzType, null, receiver, senzAttributes);
-
             senzService.send(senz);
+
+
         } catch (RemoteException e) {
             e.printStackTrace();
         }
     }
 
+    private void get() {
+
+        try {
+            ArrayList<String> data= dbSource.getSwitches();
+
+            // create senz attributes
+            HashMap<String, String> senzAttributes = new HashMap<>();
+            for (String sw: data){
+                senzAttributes.put(sw,"");
+            }
+            Log.d(TAG, "get ============  attributes : " + senzAttributes);
+            //senzAttributes.put("all","");
+            senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
+
+            // new senz
+            String id = "_ID";
+            String signature = "_SIGNATURE";
+            SenzTypeEnum senzType = SenzTypeEnum.GET;
+            User receiver = new User("", "homepi");/////ToDo  Get user name from login details
+            Senz senz = new Senz(id, signature, senzType, null, receiver, senzAttributes);
+            senzService.send(senz);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

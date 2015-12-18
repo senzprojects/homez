@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.score.homez">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/homez_rect"
@@ -32,10 +34,14 @@
         </activity>
 
         <receiver android:name=".receivers.SenzReceiver">
+
             <intent-filter>
-                <action android:name="com.score.senz.NEW_SENZ" />
+                <action android:name="com.score.senzc.NEW_SENZ" />
             </intent-filter>
         </receiver>
+
+
+
 
     </application>
 
