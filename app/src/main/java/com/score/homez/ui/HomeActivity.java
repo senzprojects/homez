@@ -22,12 +22,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.score.homez.R;
 import com.score.homez.db.DBSource;
+import com.score.homez.db.SwitchesDB;
 import com.score.homez.utils.ActivityUtils;
 import com.score.homez.utils.NetworkUtil;
 import com.score.senz.ISenzService;
@@ -47,6 +49,9 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
     //put message variables
     private String lastSwitch;
     private  String lastStatus;
+
+    private ListView list;
+    SwitchesDB db;
 
     // use to track share timeout
     private SenzCountDownTimer senzCountDownTimer;
@@ -94,6 +99,7 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+        db = new SwitchesDB(this);
 
         registerReceiver(senzMessageReceiver, new IntentFilter("com.score.senzc.DATA"));
         senzCountDownTimer = new SenzCountDownTimer(16000, 5000);
@@ -192,19 +198,10 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
      * Initialize UI components
      */
     private void initUi() {
-        typeface = Typeface.createFromAsset(getAssets(), "fonts/vegur_2.otf");
 
-        nightModeText = (TextView) findViewById(R.id.text_night_mode);
-        visitorModeText = (TextView) findViewById(R.id.text_visitor_mode);
-
-        nightModeButton = (ToggleButton) findViewById(R.id.switch_night_mode);
-        visitorModeButton = (ToggleButton) findViewById(R.id.switch_visitor_mode);
-
-        nightModeButton.setOnClickListener(this);
-        visitorModeButton.setOnClickListener(this);
-
-        nightModeText.setTypeface(typeface, Typeface.BOLD);
-        visitorModeText.setTypeface(typeface, Typeface.BOLD);
+        list = (ListView) findViewById(R.id.list_view);
+        SwitchAdapter adapter = new SwitchAdapter(this, R.layout.single_toggle, db.getAllSwitches());
+        list.setAdapter(adapter);
     }
 
     /**
