@@ -97,5 +97,20 @@ public class SwitchesDB extends SQLiteOpenHelper {
         db.update(TABLE_NAME, content, NAME + "=?", new String[]{name});
     }
 
+    public void clearDB()
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        db.delete(TABLE_NAME, null, null);
+    }
+
+    public int getCount()
+    {
+        String SELECT_ALL = "SELECT * FROM " + TABLE_NAME;
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Switch> switches = new ArrayList<>();
+        Cursor cursor = db.rawQuery(SELECT_ALL, null);
+        return cursor.getCount();
+    }
+
 }
 

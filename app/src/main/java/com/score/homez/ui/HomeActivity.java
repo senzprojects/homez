@@ -32,6 +32,7 @@ import com.score.homez.db.DBSource;
 import com.score.homez.db.SwitchesDB;
 import com.score.homez.utils.ActivityUtils;
 import com.score.homez.utils.NetworkUtil;
+import com.score.homez.utils.Switch;
 import com.score.senz.ISenzService;
 import com.score.senzc.enums.SenzTypeEnum;
 import com.score.senzc.pojos.Senz;
@@ -42,13 +43,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class  HomeActivity extends Activity implements View.OnClickListener {
+public class HomeActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG = HomeActivity.class.getName();
 
     //put message variables
     private String lastSwitch;
-    private  String lastStatus;
+    private String lastStatus;
 
     private ListView list;
     SwitchesDB db;
@@ -100,7 +101,7 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
 
         setContentView(R.layout.activity_main);
         db = new SwitchesDB(this);
-
+        initSimulationDB();
         registerReceiver(senzMessageReceiver, new IntentFilter("com.score.senzc.DATA"));
         senzCountDownTimer = new SenzCountDownTimer(16000, 5000);
         isResponseReceivedPut = true;
@@ -110,8 +111,8 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
         setupActionBar();
         bindSenzService();
         dbSource = new DBSource(getApplicationContext());
-        if(NetworkUtil.isAvailableNetwork(this)){
-            if(dbSource.getSwitches().size()>0) {
+        if (NetworkUtil.isAvailableNetwork(this)) {
+            if (dbSource.getSwitches().size() > 0) {
                 isResponseReceivedGet = false;
                 senzCountDownTimer.start();
 
@@ -126,9 +127,8 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
                 toast.show();
             }
 
-        }
-        else {
-            Toast.makeText(this,"No Network Connection Available",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "No Network Connection Available", Toast.LENGTH_LONG).show();
         }
 
     }
@@ -149,7 +149,7 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
     @Override
     public void onClick(View tb) {
 
-        if(NetworkUtil.isAvailableNetwork(this)) {
+        if (NetworkUtil.isAvailableNetwork(this)) {
 
             if (dbSource.getSwitches().size() > 0) {
 
@@ -189,12 +189,13 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
                 toast.show();
 
             }
-        }
-        else{
-            Toast.makeText(this,"No Network Conection Available",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "No Network Conection Available", Toast.LENGTH_LONG).show();
         }
     }
-    /**     }
+
+    /**
+     * }
      * Initialize UI components
      */
     private void initUi() {
@@ -242,7 +243,7 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
         public void onTick(long millisUntilFinished) {
             // if response not received yet, resend share
             if (!isResponseReceivedPut) {
-                ActivityUtils.showProgressDialog(HomeActivity.this,"Please wait ...");
+                ActivityUtils.showProgressDialog(HomeActivity.this, "Please wait ...");
                 put();
                 Log.d(TAG, "Put Response not received yet");
             }
@@ -261,15 +262,15 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
             if (!isResponseReceivedPut) {//ToDo generalize String senzclient - Homep
                 String message = "<font color=#000000>Seems we couldn't reach the </font> <font color=#eada00>" + "<b>" + "Homep" + "</b>" + "</font> <font color=#000000> at this moment</font>";
                 displayInformationMessageDialog("#PUT Fail", message);
-                isResponseReceivedPut=true;
-                nightModeButton.setChecked(1==dbSource.getStatus("s1"));
-                visitorModeButton.setChecked(1==dbSource.getStatus("s2"));
+                isResponseReceivedPut = true;
+                nightModeButton.setChecked(1 == dbSource.getStatus("s1"));
+                visitorModeButton.setChecked(1 == dbSource.getStatus("s2"));
 
             }
             if (!isResponseReceivedGet) {
                 String message = "<font color=#000000>Seems we couldn't reach the </font> <font color=#eada00>" + "<b>" + "Homep" + "</b>" + "</font> <font color=#000000> at this moment</font>";
                 displayInformationMessageDialog("#GET Fail", message);
-                isResponseReceivedGet=true;
+                isResponseReceivedGet = true;
             }
         }
     }
@@ -343,46 +344,45 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
                 if (msg != null && msg.equalsIgnoreCase("PutDone")) {
                     Log.d(TAG, "DATA #msg PutDone Recieved");
                     isResponseReceivedPut = true;
-                    for(Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
+                    for (Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
                         String key = entry.getKey();
                         int value;
-                        if(key.equals("s1")){
+                        if (key.equals("s1")) {
                             value = Integer.parseInt(entry.getValue());
-                            dbSource.setStatus(key,value);
-                            nightModeButton.setChecked(1==dbSource.getStatus(key));
-                            if(1==value) nightModeText.setText(night_on);
+                            dbSource.setStatus(key, value);
+                            nightModeButton.setChecked(1 == dbSource.getStatus(key));
+                            if (1 == value) nightModeText.setText(night_on);
                             else nightModeText.setText(night_off);
                         }
-                        if(key.equals("s2")){
+                        if (key.equals("s2")) {
                             value = Integer.parseInt(entry.getValue());
-                            dbSource.setStatus(key,value);
-                            visitorModeButton.setChecked(1==value);
-                            if(1==value) visitorModeText.setText(visitor_on);
+                            dbSource.setStatus(key, value);
+                            visitorModeButton.setChecked(1 == value);
+                            if (1 == value) visitorModeText.setText(visitor_on);
                             else visitorModeText.setText(visitor_off);
                         }
                     }
 
-                }
-                else if (msg != null && msg.equalsIgnoreCase("GetResponse")) {
+                } else if (msg != null && msg.equalsIgnoreCase("GetResponse")) {
                     isResponseReceivedGet = true;
                     Toast.makeText(this.getBaseContext(), "Status Received", Toast.LENGTH_SHORT).show();
-                    for(Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
+                    for (Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
                         String key = entry.getKey();
                         int value;
-                        if(key.equals("s1")){
+                        if (key.equals("s1")) {
                             //Log.d(TAG, "Get Response  === key   ;   vale  ==== "+key +" : "+entry.getValue());
                             value = Integer.parseInt(entry.getValue());
-                            dbSource.setStatus(key,value);
-                            nightModeButton.setChecked(1==value);
-                            if(1==value) nightModeText.setText(night_on);
+                            dbSource.setStatus(key, value);
+                            nightModeButton.setChecked(1 == value);
+                            if (1 == value) nightModeText.setText(night_on);
                             else nightModeText.setText(night_off);
                         }
-                        if(key.equals("s2")){
+                        if (key.equals("s2")) {
                             //Log.d(TAG, "Get response === key   ;   vale ===== "+key +" : "+entry.getValue());
                             value = Integer.parseInt(entry.getValue());
                             dbSource.setStatus(key, value);
                             visitorModeButton.setChecked(1 == value);
-                            if(1==value) visitorModeText.setText(visitor_on);
+                            if (1 == value) visitorModeText.setText(visitor_on);
                             else visitorModeText.setText(visitor_off);
                         }
                     }
@@ -403,7 +403,7 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
         try {
             // create senz attributes
             HashMap<String, String> senzAttributes = new HashMap<>();
-            Log.d(TAG, "put ============ "+lastSwitch+"    :    "+lastStatus);
+            Log.d(TAG, "put ============ " + lastSwitch + "    :    " + lastStatus);
             senzAttributes.put(lastSwitch, lastStatus);
             senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
 
@@ -424,12 +424,12 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
     private void get() {
 
         try {
-            ArrayList<String> data= dbSource.getSwitches();
+            ArrayList<String> data = dbSource.getSwitches();
 
             // create senz attributes
             HashMap<String, String> senzAttributes = new HashMap<>();
-            for (String sw: data){
-                senzAttributes.put(sw,"");
+            for (String sw : data) {
+                senzAttributes.put(sw, "");
             }
             Log.d(TAG, "get ============  attributes : " + senzAttributes);
             //senzAttributes.put("all","");
@@ -445,6 +445,16 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void initSimulationDB() {
+        //check to see if database is already populated
+        if(db.getCount() == 0) {
+            String[] switches = new String[]{"Night Mode", "Visitor Mode", "Alarm", "Lights", "Heating", "Cooling", "Lock Doors", "Garage Door", "Security Cameras"};
+            for (String sw : switches) {
+                db.addSwitch(sw, 0);
+            }
         }
     }
 }
