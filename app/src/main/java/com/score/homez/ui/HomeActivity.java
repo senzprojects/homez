@@ -205,6 +205,7 @@ public class  HomeActivity extends Activity implements View.OnClickListener {
 
         nightModeText.setTypeface(typeface, Typeface.BOLD);
         visitorModeText.setTypeface(typeface, Typeface.BOLD);
+
     }
 
     /**
