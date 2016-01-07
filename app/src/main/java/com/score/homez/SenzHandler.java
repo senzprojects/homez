@@ -13,7 +13,6 @@ import android.util.Log;
 import android.os.IBinder;
 
 import com.score.homez.db.DBSource;
-import com.score.homez.ui.HomeActivity;
 import com.score.homez.utils.NotificationUtils;
 import com.score.senz.ISenzService;
 import com.score.senzc.enums.SenzTypeEnum;
@@ -60,16 +59,20 @@ public class SenzHandler {
     }
 
     private void handleShareSenz(Senz senz) {
-        DBSource dbSource = new DBSource(context);
+        //SwitchesDB db = new SwitchesDB(context);
+        DBSource db= new DBSource(context);
         // if senz already exists in the db, SQLiteConstraintException should throw
         // get gpio and save in database
         //Log.e(TAG,"============="+senz.getAttributes().size());
             try {
+                db.deleteTable();
                 for(Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
                     String key = entry.getKey();
                     String value = entry.getValue();
-                    if(!key.equals("time"))
-                        dbSource.createSwitch(key);
+
+                    if(!key.contains("app") && !key.contains("time")){
+                        Log.e(TAG, key + " : " + value + "==================================================");
+                        db.createSwitch(key);}
                 }
                 NotificationUtils.showNotification(context, context.getString(R.string.new_senz), "SmartHome Switches are Shareed from @" + senz.getSender().getUsername());
                 Log.e(TAG, "Swithes are Added To Homes DB");

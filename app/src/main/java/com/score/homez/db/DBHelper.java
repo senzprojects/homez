@@ -13,14 +13,14 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String TAG = DBHelper.class.getName();
     private static DBHelper dbHelper;
 
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 5;
     private static final String DB_NAME="HomeZ.db";
 
     private static final String SQL_CREATE_HOMEZ =
             "CREATE TABLE "+DBContract.Switch.TABLE_NAME+" ("+
-            DBContract.Switch._ID + " INTEGER PRIMARY KEY AUTOINCREMENT"+", "+
-            DBContract.Switch.COLUMN_NAME_NAME +" TEXT NOT NULL, "+
-            DBContract.Switch.COLUMN_NAME_STATUS+" INT NOT NULL DEFAULT 0"+
+                    DBContract.Switch.COLUMN_NAME_ID + " INTEGER PRIMARY KEY, "+"TEXT,"+
+                    DBContract.Switch.COLUMN_NAME_NAME +" TEXT UNIQUE NOT NULL, "+
+                    DBContract.Switch.COLUMN_NAME_STATUS+" INT NOT NULL DEFAULT 0"+
                     ")";
 
     private static final String SQL_DELETE_HOMEZ =

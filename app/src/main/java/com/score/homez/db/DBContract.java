@@ -10,6 +10,7 @@ public class DBContract {
 
     public static abstract class Switch implements BaseColumns {
         public static final String TABLE_NAME = "switch";
+        public static final String COLUMN_NAME_ID = "_id";
         public static final String COLUMN_NAME_NAME = "name";
         public static final String COLUMN_NAME_STATUS = "status";
     }

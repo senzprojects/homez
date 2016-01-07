@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.score.homez.utils.Switch;
+
 import java.util.ArrayList;
 
 /**
@@ -27,9 +29,13 @@ public class DBSource {
 
         ContentValues values = new ContentValues();
         values.put(DBContract.Switch.COLUMN_NAME_NAME, name);
-
         db.insertOrThrow(DBContract.Switch.TABLE_NAME, DBContract.Switch.COLUMN_NAME_NAME, values);
         db.close();
+    }
+    public  void deleteTable(){
+        Log.d(TAG, "Dumping Database");
+        SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+        db.delete(DBContract.Switch.TABLE_NAME,null,null);
     }
 
     public void updateSwitch(String name,String newName) {
@@ -82,11 +88,11 @@ public class DBSource {
         }
     }
 
-    public ArrayList<String> getSwitches(){
+    public ArrayList<Switch> getSwitches(){
         Log.d(TAG, "get all switches from DB ");
         SQLiteDatabase db =new  DBHelper(context).getReadableDatabase();
 
-        ArrayList<String> data= new ArrayList<String>();
+        ArrayList<Switch> data= new ArrayList<Switch>();
 
         Cursor cursor = db.query(DBContract.Switch.TABLE_NAME,
                 new String[]{DBContract.Switch.COLUMN_NAME_NAME},null,//where colomn=value
@@ -99,12 +105,56 @@ public class DBSource {
         if(cursor.moveToFirst()) {
             cursor.moveToFirst();
             do {
-                data.add(cursor.getString(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_NAME)));
+                String name = cursor.getString(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_NAME));
+                int id = cursor.getInt(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_ID));
+                int status = Integer.parseInt(cursor.getString(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_STATUS)));
+                Switch aSwitch = new Switch(name, id, status);
+                data.add(aSwitch);
             } while (cursor.moveToNext());
         }
         cursor.close();
         db.close();
         return data;
+    }
+
+    public ArrayList<Switch> getAllSwitches()
+    {
+        String SELECT_ALL = "SELECT * FROM " + DBContract.Switch.TABLE_NAME;
+        SQLiteDatabase db =new  DBHelper(context).getReadableDatabase();
+        ArrayList<Switch> switches = new ArrayList<>();
+        Cursor cursor = db.rawQuery(SELECT_ALL, null);
+        //this.cursor = cursor;
+        if(cursor != null)
+        {
+            if(cursor.moveToFirst())
+            {
+                do
+                {
+                    String name = cursor.getString(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_NAME));
+                    int id = cursor.getInt(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_ID));
+                    int status = Integer.parseInt(cursor.getString(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_STATUS)));
+                    Switch aSwitch = new Switch(name, id, status);
+                    switches.add(aSwitch);
+                }
+                while(cursor.moveToNext());
+            }
+        }
+        else
+        {
+            return null;
+        }
+        db.close();
+        return switches;
+    }
+
+    public void toggleSwitch(String name, int newState)
+    {
+        SQLiteDatabase db =new  DBHelper(context).getReadableDatabase();
+        ContentValues content = new ContentValues();
+        content.put(DBContract.Switch.COLUMN_NAME_STATUS, newState+"");
+        db.update(DBContract.Switch.TABLE_NAME, content, DBContract.Switch.COLUMN_NAME_NAME + "=?", new String[]{name});
+
+        db.close();
     }
 
 
