@@ -32,10 +32,24 @@ public class DBSource {
         db.insertOrThrow(DBContract.Switch.TABLE_NAME, DBContract.Switch.COLUMN_NAME_NAME, values);
         db.close();
     }
+    public void createUser(String name) {
+        Log.d(TAG, "AddSwitch: adding switch - " + name);
+        SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(DBContract.User.COLUMN_NAME_NAME, name);
+        db.insertOrThrow(DBContract.User.TABLE_NAME, DBContract.User.COLUMN_NAME_NAME, values);
+        db.close();
+    }
+    public  void deleteUser(String name){
+        Log.d(TAG, "Dumping User from DB");
+        SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+        db.delete(DBContract.User.TABLE_NAME, DBContract.User.COLUMN_NAME_NAME + " = ?", new String[]{name});
+    }
     public  void deleteTable(){
         Log.d(TAG, "Dumping Database");
         SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
-        db.delete(DBContract.Switch.TABLE_NAME,null,null);
+        db.delete(DBContract.Switch.TABLE_NAME, null, null);
     }
 
     public void updateSwitch(String name,String newName) {
@@ -49,14 +63,36 @@ public class DBSource {
         db.close();
     }
 
-    public void setStatus(String name,int status) {
+    public void resetUserStatus() {
+        Log.d(TAG, "-------ResetUserStatus-----" );
+        SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(DBContract.User.COLUMN_NAME_STATUS, 0);
+
+        db.update(DBContract.User.TABLE_NAME, values, DBContract.User.COLUMN_NAME_STATUS + " = ?", new String[]{"1"});
+        db.close();
+    }
+
+    public void setStatus(int status1,int status2) {
+        Log.d(TAG, "setStatus : setting status - " + status1 + " to " + Integer.toString(status2));
+        SQLiteDatabase db=DBHelper.getInstance(context).getWritableDatabase();
+
+        ContentValues values=new ContentValues();
+        values.put(DBContract.Switch.COLUMN_NAME_STATUS, status2);
+
+        db.update(DBContract.Switch.TABLE_NAME, values, DBContract.Switch.COLUMN_NAME_STATUS + " = ?", new String[]{Integer.toString(status1)});
+        db.close();
+
+    }
+    public void setUserStatus(String name,int status) {
         Log.d(TAG, "setStatus : setting status - " + name + " - " + Integer.toString(status));
         SQLiteDatabase db=DBHelper.getInstance(context).getWritableDatabase();
 
         ContentValues values=new ContentValues();
-        values.put(DBContract.Switch.COLUMN_NAME_STATUS, status);
+        values.put(DBContract.User.COLUMN_NAME_STATUS, status);
 
-        db.update(DBContract.Switch.TABLE_NAME, values, DBContract.Switch.COLUMN_NAME_NAME + " = ?", new String[]{name});
+        db.update(DBContract.User.TABLE_NAME, values, DBContract.User.COLUMN_NAME_NAME + " = ?", new String[]{name});
         db.close();
 
     }
@@ -87,7 +123,31 @@ public class DBSource {
             return status;
         }
     }
+    public String getCurrentUser(){
+        Log.d(TAG, "get Current User");
+        SQLiteDatabase db =new  DBHelper(context).getReadableDatabase();
 
+        Cursor cursor = db.query(DBContract.User.TABLE_NAME,
+                null,DBContract.User.COLUMN_NAME_STATUS+" = ?",
+                new String[]{String.valueOf(1)},
+                null,   //groupby
+                null,  //having
+                null    //orderby
+        );
+        if(cursor.moveToFirst()){
+            String user = cursor.getString(cursor.getColumnIndex(DBContract.User.COLUMN_NAME_NAME));
+            cursor.close();
+            db.close();
+
+            Log.d(TAG, "Return current User from DB");
+            return user;
+        }
+        else {
+
+            Log.d(TAG, "havent Current User");
+            return null;
+        }
+    }
     public ArrayList<Switch> getSwitches(){
         Log.d(TAG, "get all switches from DB ");
         SQLiteDatabase db =new  DBHelper(context).getReadableDatabase();

@@ -22,11 +22,18 @@ public class DBHelper extends SQLiteOpenHelper {
                     DBContract.Switch.COLUMN_NAME_NAME +" TEXT UNIQUE NOT NULL, "+
                     DBContract.Switch.COLUMN_NAME_STATUS+" INT NOT NULL DEFAULT 0"+
                     ")";
+    private static final String SQL_CREATE_USER=
+            "CREATE TABLE "+DBContract.User.TABLE_NAME+" ("+
+                    DBContract.User.COLUMN_NAME_ID + " INTEGER PRIMARY KEY, "+"TEXT,"+
+                    DBContract.User.COLUMN_NAME_NAME +" TEXT UNIQUE NOT NULL, "+
+                    DBContract.User.COLUMN_NAME_STATUS+" INT NOT NULL DEFAULT 0"+
+                    ")";
 
     private static final String SQL_DELETE_HOMEZ =
             "DROP TABLE IF EXIST "+DBContract.Switch.TABLE_NAME;
 
-
+    private static final String SQL_DELETE_USER =
+            "DROP TABLE IF EXIST "+DBContract.Switch.TABLE_NAME;
 
 
     public DBHelper(Context context) {
@@ -44,15 +51,16 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         Log.d(TAG, "On create: create DBHelper , DB version" + DB_VERSION);
         Log.d(TAG, SQL_CREATE_HOMEZ);
-
+        Log.d(TAG, SQL_CREATE_USER);
         db.execSQL(SQL_CREATE_HOMEZ);
-
+        db.execSQL(SQL_CREATE_USER);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG, "OnUpgrade : upgrading db helper, db version - " + DB_VERSION);
         db.execSQL(SQL_DELETE_HOMEZ);
+        db.execSQL(SQL_DELETE_USER);
         onCreate(db);
     }
 

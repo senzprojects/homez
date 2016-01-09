@@ -66,16 +66,24 @@ public class SenzHandler {
         //Log.e(TAG,"============="+senz.getAttributes().size());
             try {
                 db.deleteTable();
+                Log.e(TAG, senz.getAttributes() + "=======================================");
+
                 for(Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
                     String key = entry.getKey();
-                    String value = entry.getValue();
-
-                    if(!key.contains("app") && !key.contains("time")){
-                        Log.e(TAG, key + " : " + value + "==================================================");
-                        db.createSwitch(key);}
+                    if (!key.contains("homez") && !key.contains("time")) {
+                        db.createSwitch(key);
+                    }
+                    if (key.contains("homez")) {
+                        Log.e(TAG, "=================App =  " + key + "  User " + senz.getSender().getUsername() + " added to DB======================");
+                        db.deleteUser(senz.getSender().getUsername());
+                        db.createUser(senz.getSender().getUsername());
+                        db.resetUserStatus();
+                        db.setUserStatus(senz.getSender().getUsername(), 1);
+                    }
                 }
-                NotificationUtils.showNotification(context, context.getString(R.string.new_senz), "SmartHome Switches are Shareed from @" + senz.getSender().getUsername());
-                Log.e(TAG, "Swithes are Added To Homes DB");
+
+                NotificationUtils.showNotification(context, context.getString(R.string.new_senz), "SmartHome Switches are Shared from @" + senz.getSender().getUsername());
+                Log.e(TAG, "Swithes and User are Added To Homes DB");
             }  catch (SQLiteConstraintException e) {
                 Log.e(TAG, e.toString());
             }

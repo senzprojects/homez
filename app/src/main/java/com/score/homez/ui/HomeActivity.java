@@ -22,7 +22,9 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,11 +45,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class  HomeActivity extends Activity {
+public class  HomeActivity extends Activity implements CompoundButton.OnCheckedChangeListener{
 
     private static final String TAG = HomeActivity.class.getName();
 
     //layout components
+    SwitchAdapter adapter;
     private ArrayList<Switch> switches;
     private ListView list;
     DBSource db;
@@ -131,19 +134,16 @@ public class  HomeActivity extends Activity {
 
         this.switches=db.getAllSwitches();
         if(switches.size()==0) { //if switches are not added to db from received share message; add sample switches for test
-            for (int i = 0; i < 9; i++) {
+            for (int i = 0; i < 4; i++) {
                 Switch s = new Switch("Switch "+i, i, 0);
                 this.switches.add(s);
             }
         }
-        else{// added more switches for checking scroll
-            for (int i = 5; i < 9; i++) {
-                Switch s = new Switch("Switch "+i, i, 0);
-                this.switches.add(s);
-            }
-        }
+//        else{// added more switches for checking scroll
+//
+//        }
         list = (ListView) findViewById(R.id.list_view);
-        SwitchAdapter adapter = new SwitchAdapter(this, R.layout.single_toggle, this.switches,senzCountDownTimer);
+        adapter = new SwitchAdapter(this, R.layout.single_toggle, switches,senzCountDownTimer);
         list.setAdapter(adapter);
     }
 
@@ -174,6 +174,12 @@ public class  HomeActivity extends Activity {
 
 
 
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+    }
+
+
     /**
      * Keep track with share response timeout
      */
@@ -201,6 +207,10 @@ public class  HomeActivity extends Activity {
 
         @Override
         public void onFinish() {
+            db.setStatus(3, 1);  //temp off to on
+            db.setStatus(5, 0);  //temp on to off
+            switches=db.getAllSwitches();
+            list.deferNotifyDataSetChanged();
             if(!isResponseReceivedGet)
                 isResponseReceivedGet=true;
             ActivityUtils.cancelProgressDialog();
@@ -287,6 +297,8 @@ public class  HomeActivity extends Activity {
                             db.toggleSwitch(key, value);
                         }
                     }
+                    switches=db.getAllSwitches();
+                    adapter.setToggleList(switches);
                     list.deferNotifyDataSetChanged();
                 }
                 else if (msg != null && msg.equalsIgnoreCase("GetResponse")) {
@@ -321,7 +333,12 @@ public class  HomeActivity extends Activity {
             // create senz attributes
             HashMap<String, String> senzAttributes = new HashMap<>();
             for (Switch sw: data){
-                senzAttributes.put(sw.getSwitchName(),sw.getStatus() == 1 ? "on":"off");
+                if (sw.getStatus()==3)
+                    senzAttributes.put(sw.getSwitchName(),"off");
+                else if (sw.getStatus()==5)
+                    senzAttributes.put(sw.getSwitchName(),"on");
+//                else
+//                    senzAttributes.put(sw.getSwitchName(),sw.getStatus() == 1 ? "on":"off");
             }
             Log.d(TAG, "put ============  attributes : " + senzAttributes);
             senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
@@ -330,7 +347,8 @@ public class  HomeActivity extends Activity {
             String id = "_ID";
             String signature = "_SIGNATURE";
             SenzTypeEnum senzType = SenzTypeEnum.PUT;
-            User receiver = new User("", "homepi");/////ToDo  Get user name from login details
+            System.out.println("====================="+db.getCurrentUser()+"========================");
+            User receiver = new User("", db.getCurrentUser());
             Senz senz = new Senz(id, signature, senzType, null, receiver, senzAttributes);
             senzService.send(senz);
 
@@ -358,7 +376,8 @@ public class  HomeActivity extends Activity {
             String id = "_ID";
             String signature = "_SIGNATURE";
             SenzTypeEnum senzType = SenzTypeEnum.GET;
-            User receiver = new User("", "homepi");/////ToDo  Get user name from login details
+            System.out.println("====================="+db.getCurrentUser()+"========================");
+            User receiver = new User("", db.getCurrentUser());
             Senz senz = new Senz(id, signature, senzType, null, receiver, senzAttributes);
             senzService.send(senz);
 

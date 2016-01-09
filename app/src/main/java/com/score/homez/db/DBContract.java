@@ -14,4 +14,11 @@ public class DBContract {
         public static final String COLUMN_NAME_NAME = "name";
         public static final String COLUMN_NAME_STATUS = "status";
     }
+
+    public static abstract class User implements BaseColumns {
+        public static final String TABLE_NAME = "user";
+        public static final String COLUMN_NAME_ID = "_id";
+        public static final String COLUMN_NAME_NAME = "name";
+        public static final String COLUMN_NAME_STATUS = "status";
+    }
 }
