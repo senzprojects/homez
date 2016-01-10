@@ -30,6 +30,7 @@ import android.widget.ToggleButton;
 import com.score.homez.R;
 
 import com.score.homez.utils.ActivityUtils;
+import com.score.homez.utils.NetworkUtil;
 import com.score.homez.utils.Switch;
 import com.score.senzc.enums.SenzTypeEnum;
 import com.score.senzc.pojos.Senz;
@@ -131,18 +132,22 @@ public class SwitchAdapter extends ArrayAdapter<Switch> {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (db.getAllSwitches().size() > 0) {
-                    final String name = switches.get(position).getSwitchName();
-                    db.toggleSwitch(name, isChecked == true ? 5 : 3);   ///3 :-temporary off , 5 :-teporary on
-                    //switches.get(position).setStatus(isChecked == true ? 1 : 0);
-                    //setToggleList(switches);
+                    if (NetworkUtil.isAvailableNetwork(context)){
+                        final String name = switches.get(position).getSwitchName();
+                        db.toggleSwitch(name, isChecked == true ? 5 : 3);   ///3 :-temporary off , 5 :-teporary on
+                        //switches.get(position).setStatus(isChecked == true ? 1 : 0);
+                        //setToggleList(switches);
+                        Log.e("state_changed ", position + " : " + isChecked + " and waiting for responce");
+                        senzCountDownTimer.start();
+                    }
+                    else {
+                        Toast.makeText(context,"No Network Connection Available",Toast.LENGTH_LONG).show();
+                    }
 
-                    Log.e("state_changed ", position + " : " + isChecked + " and waiting for responce");
-                    senzCountDownTimer.start();
-
-            } else {
-                    String message = "<font color=#000000>Switches are NOT SHARED from </font> <font color=#eada00>" + "<b>" + "SmartHome" + "</b>" + "</font> <font color=#000000> <br> Please SHARE Them</font>";
-                    displayInformationMessageDialog("#SHARE NOT RECIEVED", message);
-                }
+                } else {
+                        String message = "<font color=#000000>Switches are NOT SHARED from </font> <font color=#eada00>" + "<b>" + "SmartHome" + "</b>" + "</font> <font color=#000000> <br> Please SHARE Them</font>";
+                        displayInformationMessageDialog("#SHARE NOT RECIEVED", message);
+                    }
             }
         });
 
