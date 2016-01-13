@@ -31,13 +31,21 @@ public class SwitchAdapter extends ArrayAdapter<String> {
     ArrayList<Switch> switches;
     SwitchesDB db;
     Typeface typeface;
+    String table;
     int prev = -1;
-    public SwitchAdapter(Context context, int resource, ArrayList<Switch> switches) {
+    public SwitchAdapter(Context context, int resource,String table) {
         super(context, resource);
         this.context = context;
+        this.table = table;
         this.resource = resource;
         db = new SwitchesDB(context);
-        this.switches = db.getAllSwitches();
+        switches = new ArrayList<>();
+        for(Switch aSwitch : db.getAllSwitches(table))
+        {
+            if(!aSwitch.getSwitchName().equals("Night Mode") && !aSwitch.getSwitchName().equals("Visitor Mode")){
+                switches.add(aSwitch);
+            }
+        }
         typeface = Typeface.createFromAsset(context.getAssets(), "fonts/vegur_2.otf");
     }
 
@@ -66,7 +74,7 @@ public class SwitchAdapter extends ArrayAdapter<String> {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 toggle.setChecked(isChecked);
                 setTitle(toggle.isChecked(), title, name);
-                db.toggleSwitch(position, name, isChecked==true ? 1 : 0);
+                db.toggleSwitch(table, name, isChecked==true ? 1 : 0);
                 Log.i("state_changed", name + " has been toggled");
             }
         });

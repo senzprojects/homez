@@ -1,10 +1,12 @@
 package com.score.homez.ui;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -14,23 +16,33 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import android.widget.Toolbar;
 
 import com.score.homez.R;
 import com.score.homez.db.DBSource;
 import com.score.homez.db.SwitchesDB;
 import com.score.homez.utils.ActivityUtils;
+import com.score.homez.utils.HomesListAdapter;
 import com.score.homez.utils.NetworkUtil;
 import com.score.homez.utils.Switch;
 import com.score.senz.ISenzService;
@@ -39,6 +51,7 @@ import com.score.senzc.pojos.Senz;
 import com.score.senzc.pojos.User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +63,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     //put message variables
     private String lastSwitch;
     private String lastStatus;
+    private String table_name;
 
     private ListView list;
     SwitchesDB db;
@@ -58,6 +72,9 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     private SenzCountDownTimer senzCountDownTimer;
     private boolean isResponseReceivedPut;
     private boolean isResponseReceivedGet;
+
+    ListView homes_list;
+    ImageButton add;
 
     // we use custom font here
     private Typeface typeface;
@@ -100,6 +117,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+        getIntentData();
         db = new SwitchesDB(this);
         initSimulationDB();
         registerReceiver(senzMessageReceiver, new IntentFilter("com.score.senzc.DATA"));
@@ -194,6 +212,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         }
     }
 
+
     /**
      * }
      * Initialize UI components
@@ -201,7 +220,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     private void initUi() {
 
         list = (ListView) findViewById(R.id.list_view);
-        SwitchAdapter adapter = new SwitchAdapter(this, R.layout.single_toggle, db.getAllSwitches());
+        SwitchAdapter adapter = new SwitchAdapter(this, R.layout.single_toggle, table_name);
         list.setAdapter(adapter);
     }
 
@@ -211,14 +230,12 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     private void setupActionBar() {
         // enable ActionBar app icon to behave as action to toggle nav drawer
         //getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-
         int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
         TextView yourTextView = (TextView) findViewById(titleId);
         yourTextView.setTextColor(getResources().getColor(R.color.white));
         yourTextView.setTypeface(typeface);
 
-        getActionBar().setTitle("Switch board");
+        getActionBar().setTitle(table_name.replace("_"," "));
     }
 
     /**
@@ -448,13 +465,77 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    private void getIntentData() {
+        Intent intent = getIntent();
+        String table_name = intent.getStringExtra("home");
+
+        if (table_name != null) {
+            this.table_name = table_name;
+        } else {
+            this.table_name = "Main_Home";
+        }
+
+        getActionBar().setTitle("Switch Board for " + table_name);
+    }
+
     public void initSimulationDB() {
+        db.deleteHomeTable("Switches");
         //check to see if database is already populated
-        if(db.getCount() == 0) {
+        if (db.getCount(table_name) == 0) {
             String[] switches = new String[]{"Night Mode", "Visitor Mode", "Alarm", "Lights", "Heating", "Cooling", "Lock Doors", "Garage Door", "Security Cameras"};
             for (String sw : switches) {
-                db.addSwitch(sw, 0);
+                db.addSwitch(table_name, sw, 0);
             }
         }
+    }
+
+    public void viewHomes() {
+        Intent intent = new Intent(HomeActivity.this, Homes.class);
+        intent.putExtra("home", table_name);
+        finish();
+        startActivity(intent);
+    }
+
+    public void viewModes() {
+        Intent intent = new Intent(HomeActivity.this, Modes.class);
+        intent.putExtra("home",table_name);
+        finish();;
+        startActivity(intent);
+    }
+
+    public void viewHelp() {
+        Intent intent = new Intent(HomeActivity.this, HelpPage.class);
+        intent.putExtra("home",table_name);
+        finish();
+        startActivity(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        } else if (id == R.id.action_modes) {
+            viewModes();
+        } else if (id == R.id.action_help) {
+            viewHelp();
+        } else if (id == R.id.action_homes) {
+            viewHomes();
+        }
+
+
+        return super.onOptionsItemSelected(item);
     }
 }

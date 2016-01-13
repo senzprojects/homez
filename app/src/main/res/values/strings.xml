@@ -8,5 +8,9 @@
     <string name="night_on"><html><font color='#4a4a4a'>Night Mode </font> <font color='#eada00'>[ON]</font></html></string>
     <string name="visitor_off"><html><font color='#4a4a4a'>Visitor Mode </font> <font color='red'>[OFF]</font></html></string>
     <string name="visitor_on"><html><font color='#4a4a4a'>Visitor Mode </font> <font color='#eada00'>[ON]</font></html></string>
+    <string name="title_activity_modes">Modes</string>
+    <string name="title_activity_help_page">HelpPage</string>
+    <string name="title_activity_add_home">AddHome</string>
+    <string name="title_activity_homes">Homes</string>
 
 </resources>
