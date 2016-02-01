@@ -11,14 +11,18 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.os.IBinder;
+import android.widget.ListView;
 
 import com.score.homez.db.DBSource;
+import com.score.homez.ui.SwitchAdapter;
 import com.score.homez.utils.NotificationUtils;
+import com.score.homez.utils.Switch;
 import com.score.senz.ISenzService;
 import com.score.senzc.enums.SenzTypeEnum;
 import com.score.senzc.pojos.Senz;
 import com.score.senzc.pojos.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,8 +34,11 @@ public class SenzHandler {
     private static final String TAG = SenzHandler.class.getName();
 
     private static Context context;
-
     private static SenzHandler instance;
+    //layout components
+    SwitchAdapter adapter;
+    private ArrayList<Switch> switches;
+    private ListView list;
 
     private SenzHandler() {
     }
@@ -58,6 +65,28 @@ public class SenzHandler {
         }
     }
 
+    private void handleDataSenz(Senz senz) {
+        DBSource db= new DBSource(context);
+        //if DATA Senz
+        for (Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
+            String key = entry.getKey();
+            String svalue = entry.getValue();
+            int value;
+            Log.d(TAG, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + svalue);
+            if (key.contains("s1") || key.contains("s2")) {
+                if (svalue.equals("on")) value = 5;
+                else value = 3;
+                db.toggleSwitch(key, value);
+            }
+        }
+        //switches=db.getAllSwitches();
+        //Log.d(TAG, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + switches.toString());
+
+        // adapter.setToggleList(switches);
+    //    list.deferNotifyDataSetChanged();
+    }
+
+
     private void handleShareSenz(Senz senz) {
         //SwitchesDB db = new SwitchesDB(context);
         DBSource db= new DBSource(context);
@@ -81,7 +110,6 @@ public class SenzHandler {
                         db.setUserStatus(senz.getSender().getUsername(), 1);
                     }
                 }
-
                 NotificationUtils.showNotification(context, context.getString(R.string.new_senz), "SmartHome Switches are Shared from @" + senz.getSender().getUsername());
                 Log.e(TAG, "Swithes and User are Added To Homes DB");
             }  catch (SQLiteConstraintException e) {
@@ -92,13 +120,14 @@ public class SenzHandler {
 
     }
 
-
+/*
     private void handleDataSenz(Senz senz) {
         // rebroadcast senz
-        Intent intent = new Intent("com.score.senzc.DATA");
+        //Intent intent = new Intent("com.score.senzc.DATA");
+        Intent intent = new Intent("com.score.senz.NEW_SENZ");
         intent.putExtra("SENZ", senz);
 
         //context.sendBroadcast(intent);
     }
-
+*/
 }

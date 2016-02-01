@@ -59,7 +59,7 @@ public class Senz implements Parcelable {
         dest.writeString(signature);
         dest.writeString(senzType.name());
         dest.writeParcelable(sender, flags);
-        dest.writeParcelable(receiver, flags);
+        dest.writeParcelable(receiver,flags);
 
         // write attribute map to parcel
         dest.writeInt(attributes.size());
