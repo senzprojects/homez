@@ -14,27 +14,25 @@ public class DBHelper extends SQLiteOpenHelper {
     private static DBHelper dbHelper;
 
     private static final int DB_VERSION = 5;
-    private static final String DB_NAME="HomeZ.db";
+    private static final String DB_NAME = "HomeZ.db";
 
-    private static final String SQL_CREATE_HOMEZ =
-            "CREATE TABLE "+DBContract.Switch.TABLE_NAME+" ("+
-                    DBContract.Switch.COLUMN_NAME_ID + " INTEGER PRIMARY KEY, "+"TEXT,"+
-                    DBContract.Switch.COLUMN_NAME_NAME +" TEXT UNIQUE NOT NULL, "+
-                    DBContract.Switch.COLUMN_NAME_STATUS+" INT NOT NULL DEFAULT 0"+
+    private static final String SQL_CREATE_SWITCH =
+            "CREATE TABLE " + DBContract.Switch.TABLE_NAME + " (" +
+                    DBContract.Switch._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + ", " +
+                    DBContract.Switch.COLUMN_NAME_NAME + " TEXT UNIQUE NOT NULL, " +
+                    DBContract.Switch.COLUMN_NAME_STATUS + " INT NOT NULL DEFAULT 0" +
                     ")";
-    private static final String SQL_CREATE_USER=
-            "CREATE TABLE "+DBContract.User.TABLE_NAME+" ("+
-                    DBContract.User.COLUMN_NAME_ID + " INTEGER PRIMARY KEY, "+"TEXT,"+
-                    DBContract.User.COLUMN_NAME_NAME +" TEXT UNIQUE NOT NULL, "+
-                    DBContract.User.COLUMN_NAME_STATUS+" INT NOT NULL DEFAULT 0"+
+    private static final String SQL_CREATE_USER =
+            "CREATE TABLE " + DBContract.User.TABLE_NAME + " (" +
+                    DBContract.User._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + "," +
+                    DBContract.User.COLUMN_NAME_USERNAME + " TEXT UNIQUE NOT NULL" +
                     ")";
 
-    private static final String SQL_DELETE_HOMEZ =
-            "DROP TABLE IF EXIST "+DBContract.Switch.TABLE_NAME;
+    private static final String SQL_DELETE_SWITCH =
+            "DROP TABLE IF EXIST " + DBContract.Switch.TABLE_NAME;
 
     private static final String SQL_DELETE_USER =
-            "DROP TABLE IF EXIST "+DBContract.Switch.TABLE_NAME;
-
+            "DROP TABLE IF EXIST " + DBContract.Switch.TABLE_NAME;
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -50,21 +48,21 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d(TAG, "On create: create DBHelper , DB version" + DB_VERSION);
-        Log.d(TAG, SQL_CREATE_HOMEZ);
+        Log.d(TAG, SQL_CREATE_SWITCH);
         Log.d(TAG, SQL_CREATE_USER);
-        db.execSQL(SQL_CREATE_HOMEZ);
+        db.execSQL(SQL_CREATE_SWITCH);
         db.execSQL(SQL_CREATE_USER);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG, "OnUpgrade : upgrading db helper, db version - " + DB_VERSION);
-        db.execSQL(SQL_DELETE_HOMEZ);
+        db.execSQL(SQL_DELETE_SWITCH);
         db.execSQL(SQL_DELETE_USER);
         onCreate(db);
     }
 
-    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion){
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
     }
 }

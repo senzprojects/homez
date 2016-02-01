@@ -111,12 +111,3 @@ public class SwitchActivity extends Activity {
     }
 
 }
-
-  //      context=getApplicationContext();
-    //    DBSource dbSource = new DBSource(context);
-      //  dbSource.createSwitch("GPIO_01");
-        //System.out.println("********************************************" + dbSource.getStatus("GPIO_01"));
-        //dbSource.setStatus("GPIO_01", 1);
-     //   System.out.println("/*/*/*/****************************" + dbSource.getStatus("GPIO_01"));
-     //   dbSource.updateSwitch("GPIO_01", "GPIO_2");
-     //   System.out.println("/*/*/*/****************************" + dbSource.getStatus("GPIO_2"));
