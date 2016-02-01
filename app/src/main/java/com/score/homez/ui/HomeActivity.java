@@ -31,6 +31,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.score.homez.R;
+import com.score.homez.SenzHandler;
 import com.score.homez.db.DBSource;
 import com.score.homez.utils.ActivityUtils;
 import com.score.homez.utils.NetworkUtil;
@@ -88,21 +89,21 @@ public class  HomeActivity extends Activity implements CompoundButton.OnCheckedC
 
         setContentView(R.layout.activity_main);
         db= new DBSource(this);
-        registerReceiver(senzMessageReceiver, new IntentFilter("com.score.senzc.DATA"));
+        registerReceiver(senzMessageReceiver, new IntentFilter("com.score.senz.NEW_SENZ"));
         senzCountDownTimer = new SenzCountDownTimer(16000, 5000);
         //isResponseReceivedPut = true;
         isResponseReceivedGet = true;
 
+        initConfig();
         initUi();
         setupActionBar();
-        bindSenzService();
+
 
         if(NetworkUtil.isAvailableNetwork(this)){
             if(db.getAllSwitches().size()>0) {
                 Log.e(TAG, "Switches are exist in  DB");
                 isResponseReceivedGet = false;
                 senzCountDownTimer.start();
-
 
             } else {
                 String message = "<font color=#000000>Switches are NOT SHARED from </font> <font color=#eada00>" + "<b>" + "SmartHome" + "</b>" + "</font> <font color=#000000> <br> Please SHARE Them</font>";
@@ -143,8 +144,14 @@ public class  HomeActivity extends Activity implements CompoundButton.OnCheckedC
 //
 //        }
         list = (ListView) findViewById(R.id.list_view);
-        adapter = new SwitchAdapter(this, R.layout.single_toggle, switches,senzCountDownTimer);
+        adapter = new SwitchAdapter(this, R.layout.single_toggle,switches,senzCountDownTimer);
         list.setAdapter(adapter);
+    }
+
+    private void initConfig() {
+        Intent intent = new Intent();
+        intent.setClassName("com.score.senz", "com.score.senz.services.RemoteSenzService");
+        bindService(intent, senzServiceConnection, BIND_AUTO_CREATE);
     }
 
     /**
@@ -161,6 +168,7 @@ public class  HomeActivity extends Activity implements CompoundButton.OnCheckedC
         yourTextView.setTypeface(typeface);
 
         getActionBar().setTitle("Switch board");
+       // bindSenzService();
     }
 
     /**
@@ -199,7 +207,7 @@ public class  HomeActivity extends Activity implements CompoundButton.OnCheckedC
                 Log.d(TAG, "Get Response not received yet");
             }else {
                 ActivityUtils.cancelProgressDialog();
-                ActivityUtils.showProgressDialog(HomeActivity.this,"Please wait ...");
+                ActivityUtils.showProgressDialog(HomeActivity.this, "Please wait ...");
                 put();
                 Log.d(TAG, "Put Response not received yet");
             }
@@ -262,63 +270,37 @@ public class  HomeActivity extends Activity implements CompoundButton.OnCheckedC
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Got message from Senz service");
-            handleMessage(intent);
+            String action = intent.getAction();
+            if (action.equalsIgnoreCase("com.score.senz.NEW_SENZ")) {
+                Senz senz = intent.getExtras().getParcelable("SENZ");
+                senzCountDownTimer.cancel();
+                ActivityUtils.cancelProgressDialog();
+                if (senz.getAttributes().containsValue("GetResponse")){
+                    isResponseReceivedGet=true;
+                    senzCountDownTimer.cancel();
+                } else if (senz.getSenzType()==SenzTypeEnum.SHARE) {
+                    share();
+                    displayInformationMessageDialog("SHARE SENZE", "OK");
+                }
+                SenzHandler.getInstance(context).handleSenz(senz);
+            }
         }
     };
 
-    /**
-     * Handle broadcast message receives
-     * Need to handle registration success failure here
-     *
-     * @param intent intent
-     */
-    private void handleMessage(Intent intent) {
-        String action = intent.getAction();
-
-        if (action.equalsIgnoreCase("com.score.senzc.DATA")) {
-            Senz senz = intent.getExtras().getParcelable("SENZ");
-
-            if (senz.getAttributes().containsKey("msg")) {
-                // msg response received
-                ActivityUtils.cancelProgressDialog();
-                senzCountDownTimer.cancel();
-
-                String msg = senz.getAttributes().get("msg");
-//                if (msg != null && msg.equalsIgnoreCase("PutDone")) {ToDo if msg is not equals
-//                    //onPostShare();
-                if (msg != null && msg.equalsIgnoreCase("PutDone")) {
-                    Log.d(TAG, "DATA #msg PutDone Recieved");
-                    //isResponseReceivedPut = true;
-                    for(Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
-                        String key = entry.getKey();
-                        //Log.d(TAG, key + " : " + entry.getValue() + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-                        if (!key.contains("app") && !key.contains("time") && !key.contains("msg")) {
-                            int value = Integer.parseInt(entry.getValue());
-                            db.toggleSwitch(key, value);
-                        }
-                    }
-                    switches=db.getAllSwitches();
-                    adapter.setToggleList(switches);
-                    list.deferNotifyDataSetChanged();
-                }
-                else if (msg != null && msg.equalsIgnoreCase("GetResponse")) {
-                    isResponseReceivedGet = true;
-                    Toast.makeText(this.getBaseContext(), "Status Received", Toast.LENGTH_SHORT).show();
-                    for(Map.Entry<String, String> entry : senz.getAttributes().entrySet()) {
-                        String key = entry.getKey();
-                        //Log.d(TAG, key+" : "+entry.getValue()+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-                        if(!key.contains("app") && !key.contains("time") && !key.contains("msg")){
-                            int value = Integer.parseInt(entry.getValue());
-                            db.toggleSwitch(key, value);
-                        }
-                    }
-                    initUi();
-
-                } else {
-                    String message = "<font color=#000000>Seems we couldn't PUT </font> <font color=#eada00>" + "<b>" + "gpio" + "</b>" + "</font>";
-                    displayInformationMessageDialog("#Share Fail", message);
-                }
-            }
+    private void share() {
+        // new senz
+        try{
+            String id = "_ID";
+            String signature = "_SIGNATURE";
+            SenzTypeEnum senzType = SenzTypeEnum.DATA;
+            User receiver = new User("",db.getCurrentUser());
+            HashMap<String, String> senzAttributes = new HashMap<>();
+            senzAttributes.put("msg","ShareDone");
+            senzAttributes.put("time",((Long) (System.currentTimeMillis() / 1000)).toString());
+            Senz senz = new Senz(id,signature,senzType,null,receiver,senzAttributes);
+            senzService.send(senz);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
@@ -332,6 +314,7 @@ public class  HomeActivity extends Activity implements CompoundButton.OnCheckedC
             ArrayList<Switch> data= db.getAllSwitches();
             // create senz attributes
             HashMap<String, String> senzAttributes = new HashMap<>();
+
             for (Switch sw: data){
                 if (sw.getStatus()==3)
                     senzAttributes.put(sw.getSwitchName(),"off");
@@ -340,18 +323,20 @@ public class  HomeActivity extends Activity implements CompoundButton.OnCheckedC
 //                else
 //                    senzAttributes.put(sw.getSwitchName(),sw.getStatus() == 1 ? "on":"off");
             }
-            Log.d(TAG, "put ============  attributes : " + senzAttributes);
+
+            //senzAttributes.put("s1","on");
+            //Log.d(TAG, "put ============  attributes : " + senzAttributes);
             senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
+            Log.d(TAG, "put ============  attributes : " + senzAttributes);
 
             // new senz
             String id = "_ID";
             String signature = "_SIGNATURE";
             SenzTypeEnum senzType = SenzTypeEnum.PUT;
-            System.out.println("====================="+db.getCurrentUser()+"========================");
-            User receiver = new User("", db.getCurrentUser());
-            Senz senz = new Senz(id, signature, senzType, null, receiver, senzAttributes);
+            //System.out.println("====================="+db.getCurrentUser()+"========================");
+            User receiver = new User("",db.getCurrentUser());
+            Senz senz = new Senz(id,signature,senzType,null,receiver,senzAttributes);
             senzService.send(senz);
-
 
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -376,9 +361,9 @@ public class  HomeActivity extends Activity implements CompoundButton.OnCheckedC
             String id = "_ID";
             String signature = "_SIGNATURE";
             SenzTypeEnum senzType = SenzTypeEnum.GET;
-            System.out.println("====================="+db.getCurrentUser()+"========================");
+            //System.out.println("====================="+db.getCurrentUser()+"========================");
             User receiver = new User("", db.getCurrentUser());
-            Senz senz = new Senz(id, signature, senzType, null, receiver, senzAttributes);
+            Senz senz = new Senz(id,signature, senzType,null,receiver, senzAttributes);
             senzService.send(senz);
 
         } catch (Exception e) {
