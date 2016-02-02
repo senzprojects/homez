@@ -15,7 +15,6 @@ import android.widget.ToggleButton;
 
 import com.score.homez.R;
 import com.score.homez.pojos.Switchz;
-import com.score.senzc.pojos.User;
 
 import java.util.ArrayList;
 
@@ -79,8 +78,7 @@ public class SwitchListAdapter extends BaseAdapter {
         holder.switchToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                displayDeleteMessageDialog("Sure to switch on ", new User("1", "sdf"));
+                displayDeleteMessageDialog("Are you sure you want to switch [" + (holder.switchToggle.isChecked() ? "ON" : "OFF") + "] " + "the switch", holder.switchToggle, switchz);
             }
         });
 
@@ -100,7 +98,7 @@ public class SwitchListAdapter extends BaseAdapter {
      *
      * @param message message to be display
      */
-    public void displayDeleteMessageDialog(String message, final User user) {
+    public void displayDeleteMessageDialog(String message, final ToggleButton toggleButton, Switchz switchz) {
         final Dialog dialog = new Dialog(context);
 
         //set layout for dialog
@@ -125,6 +123,13 @@ public class SwitchListAdapter extends BaseAdapter {
         okButton.setTypeface(null, Typeface.BOLD);
         okButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                if (toggleButton.isChecked()) {
+                    // send switch on
+
+                } else {
+                    // send switch off
+
+                }
                 dialog.cancel();
             }
         });
@@ -135,6 +140,7 @@ public class SwitchListAdapter extends BaseAdapter {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 dialog.cancel();
+                toggleButton.setChecked(!toggleButton.isChecked());
             }
         });
 

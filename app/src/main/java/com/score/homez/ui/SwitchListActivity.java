@@ -58,13 +58,13 @@ public class SwitchListActivity extends Activity {
     private boolean isServiceBound = false;
 
     // keep track with weather response received
-    private boolean isResponseReceived;
+    private boolean isResponseReceived = false;
 
     // currently switching switch
     private Switchz switchz;
 
     // count down timer
-    private CountDownTimer timer;
+    private SenzCountDownTimer senzCountDownTimer;
 
     // service connection
     private ServiceConnection senzServiceConnection = new ServiceConnection() {
@@ -79,6 +79,7 @@ public class SwitchListActivity extends Activity {
         }
     };
 
+    // Receives data senz to here
     private BroadcastReceiver senzMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -86,6 +87,35 @@ public class SwitchListActivity extends Activity {
             handleMessage(intent);
         }
     };
+
+    // Keep track with senz response timeout
+    private class SenzCountDownTimer extends CountDownTimer {
+
+        public SenzCountDownTimer(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            // if response not received yet, resend share
+            if (!isResponseReceived) {
+                put(switchz);
+                Log.d(TAG, "Response not received yet");
+            }
+        }
+
+        @Override
+        public void onFinish() {
+            ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
+            ActivityUtils.cancelProgressDialog();
+
+            // display message dialog that we couldn't reach the user
+            if (!isResponseReceived) {
+                String message = "<font color=#000000>Seems we couldn't reach the home </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font> <font color=#000000> at this moment</font>";
+                displayInformationMessageDialog("#PUT Fail", message);
+            }
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -95,8 +125,12 @@ public class SwitchListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.switch_list_layout);
 
+        senzCountDownTimer = new SenzCountDownTimer(16000, 5000);
+        isResponseReceived = false;
+
         bindSenzService();
         registerReceiver(senzMessageReceiver, new IntentFilter("com.score.senz.DATA_SENZ"));
+
         initUi();
         setupActionBar();
         displaySwitchList();
@@ -173,33 +207,12 @@ public class SwitchListActivity extends Activity {
         getActionBar().setTitle("Homez");
     }
 
-    private void startPutTimer(final Switchz switchz) {
-        timer = new CountDownTimer(16000, 5000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                // if response not received yet, resend share
-                if (!isResponseReceived) {
-                    switchMode(switchz);
-                    Log.d(TAG, "Response not received yet");
-                }
-            }
-
-            @Override
-            public void onFinish() {
-                ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
-                ActivityUtils.cancelProgressDialog();
-
-                // display message dialog that we couldn't reach the user
-                if (!isResponseReceived) {
-                    String message = "<font color=#000000>Seems we couldn't reach the home </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font> <font color=#000000> at this moment</font>";
-                    displayInformationMessageDialog("#PUT Fail", message);
-                }
-            }
-        };
-        timer.start();
-    }
-
-    private void switchMode(Switchz switchz) {
+    /**
+     * Send switch put senz to switching
+     *
+     * @param switchz switch
+     */
+    private void put(Switchz switchz) {
         HashMap<String, String> senzAttributes = new HashMap<>();
         senzAttributes.put(switchz.getName(), switchz.getStatus() == 0 ? "on" : "off");
         senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
@@ -236,7 +249,7 @@ public class SwitchListActivity extends Activity {
                 // msg response received
                 ActivityUtils.cancelProgressDialog();
                 isResponseReceived = true;
-                timer.cancel();
+                senzCountDownTimer.cancel();
 
                 String msg = senz.getAttributes().get("msg");
                 if (msg != null && msg.equalsIgnoreCase("PutDone")) {
@@ -249,10 +262,20 @@ public class SwitchListActivity extends Activity {
         }
     }
 
+    /**
+     * Call after PUT response
+     *
+     * @param senz
+     */
     private void onPostPut(Senz senz) {
 
     }
 
+    /**
+     * Call after GET response
+     *
+     * @param senz
+     */
     private void onPostGet(Senz senz) {
 
     }
