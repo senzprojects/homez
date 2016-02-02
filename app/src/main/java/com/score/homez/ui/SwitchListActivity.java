@@ -23,6 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.score.homez.R;
+import com.score.homez.db.HomezDbSource;
 import com.score.homez.pojos.Switchz;
 import com.score.homez.utils.ActivityUtils;
 import com.score.homez.utils.SenzUtils;
@@ -288,8 +289,13 @@ public class SwitchListActivity extends Activity {
 
         String msg = senz.getAttributes().get("msg");
         if (msg != null && msg.equalsIgnoreCase("PutDone")) {
-            // TODO update switches in db
-            // TODO reload list
+            // TODO update switch in db
+            //new HomezDbSource(this).setSwitchStatus(new Switchz(name, status));
+
+            // reload list
+            switchzList = (ArrayList<Switchz>) new HomezDbSource(this).getAllSwitches();
+            switchListAdapter = new SwitchListAdapter(switchzList, this);
+            switchListView.setAdapter(switchListAdapter);
         } else {
             String message = "<font color=#000000>Seems we couldn't access the switch </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font>";
             displayInformationMessageDialog("#PUT Fail", message);
@@ -304,8 +310,13 @@ public class SwitchListActivity extends Activity {
     private void onPostGet(Senz senz) {
         getTimer.cancel();
 
-        // TODO update switch status in UI
-        // TODO reload list
+        // TODO update switch status in DB
+        //new HomezDbSource(this).setSwitchStatus(new Switchz(name, status));
+
+        // reload list
+        switchzList = (ArrayList<Switchz>) new HomezDbSource(this).getAllSwitches();
+        switchListAdapter = new SwitchListAdapter(switchzList, this);
+        switchListView.setAdapter(switchListAdapter);
     }
 
     /**
