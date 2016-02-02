@@ -79,7 +79,8 @@ public class SwitchListAdapter extends BaseAdapter {
         holder.switchToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayDeleteMessageDialog("Sure to siwtch on ", new User("1", "sdf"));
+
+                displayDeleteMessageDialog("Sure to switch on ", new User("1", "sdf"));
             }
         });
 
