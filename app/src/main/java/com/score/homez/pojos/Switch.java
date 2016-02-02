@@ -3,11 +3,11 @@ package com.score.homez.pojos;
 /**
  * Created by eranga on 2/1/16.
  */
-public class Switchz {
+public class Switch {
     String name;
     int status;
 
-    public Switchz(String name, int status) {
+    public Switch(String name, int status) {
         this.name = name;
         this.status = status;
     }

@@ -3,7 +3,7 @@ package com.score.homez.utils;
 import android.content.Context;
 
 import com.score.homez.exceptions.NoUserException;
-import com.score.homez.pojos.Switchz;
+import com.score.homez.pojos.Switch;
 import com.score.senzc.enums.SenzTypeEnum;
 import com.score.senzc.pojos.Senz;
 import com.score.senzc.pojos.User;
@@ -15,9 +15,9 @@ import java.util.HashMap;
  * Created by eranga on 2/2/16.
  */
 public class SenzUtils {
-    public static Senz createPutSenz(Switchz switchz, Context context) {
+    public static Senz createPutSenz(Switch aSwitch, Context context) {
         HashMap<String, String> senzAttributes = new HashMap<>();
-        senzAttributes.put(switchz.getName(), switchz.getStatus() == 0 ? "on" : "off");
+        senzAttributes.put(aSwitch.getName(), aSwitch.getStatus() == 0 ? "on" : "off");
         senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
 
         try {
@@ -37,7 +37,7 @@ public class SenzUtils {
         return null;
     }
 
-    public static Senz createGetSenz(ArrayList<Switchz> switchzList, Context context) {
+    public static Senz createGetSenz(ArrayList<Switch> switchList, Context context) {
         return null;
     }
 }

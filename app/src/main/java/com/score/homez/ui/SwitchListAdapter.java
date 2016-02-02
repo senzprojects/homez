@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.score.homez.R;
-import com.score.homez.pojos.Switchz;
+import com.score.homez.pojos.Switch;
 
 import java.util.ArrayList;
 
@@ -23,24 +23,24 @@ import java.util.ArrayList;
  */
 public class SwitchListAdapter extends BaseAdapter {
 
-    private ArrayList<Switchz> switchzList;
+    private ArrayList<Switch> switchList;
     private Context context;
     private Typeface typeface;
 
-    public SwitchListAdapter(ArrayList<Switchz> switchzList, Context context) {
-        this.switchzList = switchzList;
+    public SwitchListAdapter(ArrayList<Switch> switchList, Context context) {
+        this.switchList = switchList;
         this.context = context;
         this.typeface = Typeface.createFromAsset(context.getAssets(), "fonts/vegur_2.otf");
     }
 
     @Override
     public int getCount() {
-        return switchzList.size();
+        return switchList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return switchzList.get(position);
+        return switchList.get(position);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class SwitchListAdapter extends BaseAdapter {
         // A ViewHolder keeps references to children views to avoid unnecessary calls
         // to findViewById() on each row.
         final ViewHolder holder;
-        final Switchz switchz = (Switchz) getItem(position);
+        final Switch aSwitch = (Switch) getItem(position);
 
         if (view == null) {
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -70,15 +70,15 @@ public class SwitchListAdapter extends BaseAdapter {
         }
 
         // bind view holder content view for efficient use
-        holder.switchName.setText(switchz.getName());
+        holder.switchName.setText(aSwitch.getName());
         holder.switchName.setTypeface(typeface, Typeface.BOLD);
-        holder.switchToggle.setChecked(switchz.getStatus() == 1);
+        holder.switchToggle.setChecked(aSwitch.getStatus() == 1);
 
         // set toggle button click listener
         holder.switchToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayConfirmMessageDialog("<font color=#000000>Are you sure you want to switch </font><font color=#eada00><b> [" + (holder.switchToggle.isChecked() ? "ON" : "OFF") + "] </b></font>" + "the switch", holder.switchToggle, switchz);
+                displayConfirmMessageDialog("<font color=#000000>Are you sure you want to switch </font><font color=#eada00><b> [" + (holder.switchToggle.isChecked() ? "ON" : "OFF") + "] </b></font>" + "the switch", holder.switchToggle, aSwitch);
             }
         });
 
@@ -98,7 +98,7 @@ public class SwitchListAdapter extends BaseAdapter {
      *
      * @param message message to be display
      */
-    public void displayConfirmMessageDialog(String message, final ToggleButton toggleButton, Switchz switchz) {
+    public void displayConfirmMessageDialog(String message, final ToggleButton toggleButton, Switch aSwitch) {
         final Dialog dialog = new Dialog(context);
 
         //set layout for dialog

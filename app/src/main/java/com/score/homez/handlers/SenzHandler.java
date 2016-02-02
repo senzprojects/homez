@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.score.homez.R;
 import com.score.homez.db.HomezDbSource;
-import com.score.homez.pojos.Switchz;
+import com.score.homez.pojos.Switch;
 import com.score.homez.services.SenzServiceConnection;
 import com.score.homez.utils.NotificationUtils;
 import com.score.homez.utils.PreferenceUtils;
@@ -85,7 +85,7 @@ public class SenzHandler {
 
                     // create switches then
                     for (String key : senz.getAttributes().keySet()) {
-                        dbSource.createSwitch(new Switchz(key, 0));
+                        dbSource.createSwitch(new Switch(key, 0));
 
                         Log.d(TAG, "created switch with " + key);
                     }

@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.score.homez.pojos.Switchz;
+import com.score.homez.pojos.Switch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,34 +24,34 @@ public class HomezDbSource {
         this.context = context;
     }
 
-    public void createSwitch(Switchz switchz) {
-        Log.d(TAG, "AddSwitch: adding switch - " + switchz.getName());
+    public void createSwitch(Switch aSwitch) {
+        Log.d(TAG, "AddSwitch: adding switch - " + aSwitch.getName());
         SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(HomezDbContract.Switch.COLUMN_NAME_NAME, switchz.getName());
-        values.put(HomezDbContract.Switch.COLUMN_NAME_STATUS, switchz.getStatus());
+        values.put(HomezDbContract.Switch.COLUMN_NAME_NAME, aSwitch.getName());
+        values.put(HomezDbContract.Switch.COLUMN_NAME_STATUS, aSwitch.getStatus());
         db.insertOrThrow(HomezDbContract.Switch.TABLE_NAME, HomezDbContract.Switch.COLUMN_NAME_NAME, values);
         db.close();
     }
 
-    public void setSwitchStatus(Switchz switchz) {
-        Log.d(TAG, "Set status of switch " + switchz.getName() + " to " + switchz.getStatus());
+    public void setSwitchStatus(Switch aSwitch) {
+        Log.d(TAG, "Set status of switch " + aSwitch.getName() + " to " + aSwitch.getStatus());
         SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(HomezDbContract.Switch.COLUMN_NAME_STATUS, switchz.getStatus());
+        values.put(HomezDbContract.Switch.COLUMN_NAME_STATUS, aSwitch.getStatus());
 
         db.update(HomezDbContract.Switch.TABLE_NAME,
                 values,
                 HomezDbContract.Switch.COLUMN_NAME_NAME + " = ?",
-                new String[]{switchz.getName()});
+                new String[]{aSwitch.getName()});
         db.close();
     }
 
-    public List<Switchz> getAllSwitches() {
+    public List<Switch> getAllSwitches() {
         Log.d(TAG, "getting all switched");
-        List<Switchz> switchList = new ArrayList<>();
+        List<Switch> switchList = new ArrayList<>();
 
         SQLiteDatabase db = HomezDbHelper.getInstance(context).getReadableDatabase();
         Cursor cursor = db.query(HomezDbContract.Switch.TABLE_NAME, null, null, null, null, null, null);
@@ -65,7 +65,7 @@ public class HomezDbSource {
             _switchName = cursor.getString(cursor.getColumnIndex(HomezDbContract.Switch.COLUMN_NAME_NAME));
             _status = cursor.getInt(cursor.getColumnIndex(HomezDbContract.Switch.COLUMN_NAME_STATUS));
 
-            switchList.add(new Switchz(_switchName, _status));
+            switchList.add(new Switch(_switchName, _status));
         }
 
         // clean

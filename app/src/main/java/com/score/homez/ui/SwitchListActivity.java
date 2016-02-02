@@ -24,7 +24,7 @@ import android.widget.TextView;
 
 import com.score.homez.R;
 import com.score.homez.db.HomezDbSource;
-import com.score.homez.pojos.Switchz;
+import com.score.homez.pojos.Switch;
 import com.score.homez.utils.ActivityUtils;
 import com.score.homez.utils.SenzUtils;
 import com.score.senz.ISenzService;
@@ -43,7 +43,7 @@ public class SwitchListActivity extends Activity {
     private Typeface typeface;
 
     // switch list
-    private ArrayList<Switchz> switchzList;
+    private ArrayList<Switch> switchList;
 
     private ListView switchListView;
     private SwitchListAdapter switchListAdapter;
@@ -147,12 +147,12 @@ public class SwitchListActivity extends Activity {
         // get switch list via db
         //switchzList = (ArrayList<Switchz>) new HomezDbSource(this).getAllSwitches();
 
-        switchzList = new ArrayList<>();
-        switchzList.add(new Switchz("Night", 1));
-        switchzList.add(new Switchz("Day", 1));
-        switchzList.add(new Switchz("Visitor", 0));
+        switchList = new ArrayList<>();
+        switchList.add(new Switch("Night", 1));
+        switchList.add(new Switch("Day", 1));
+        switchList.add(new Switch("Visitor", 0));
 
-        switchListAdapter = new SwitchListAdapter(switchzList, this);
+        switchListAdapter = new SwitchListAdapter(switchList, this);
         switchListAdapter.notifyDataSetChanged();
         switchListView.setAdapter(switchListAdapter);
     }
@@ -176,11 +176,11 @@ public class SwitchListActivity extends Activity {
     /**
      * Send periodic PUT request via timer
      *
-     * @param switchz
+     * @param aSwitch
      */
-    private void doPut(Switchz switchz) {
+    private void doPut(Switch aSwitch) {
         // create put senz
-        final Senz senz = SenzUtils.createPutSenz(switchz, this);
+        final Senz senz = SenzUtils.createPutSenz(aSwitch, this);
 
         putTimer = new CountDownTimer(16000, 5000) {
             @Override
@@ -215,11 +215,11 @@ public class SwitchListActivity extends Activity {
     /**
      * Send periodic GET senz via timer
      *
-     * @param switchzList
+     * @param switchList
      */
-    private void doGet(ArrayList<Switchz> switchzList) {
+    private void doGet(ArrayList<Switch> switchList) {
         // create get senz
-        final Senz senz = SenzUtils.createGetSenz(switchzList, this);
+        final Senz senz = SenzUtils.createGetSenz(switchList, this);
 
         getTimer = new CountDownTimer(16000, 5000) {
             @Override
@@ -293,8 +293,8 @@ public class SwitchListActivity extends Activity {
             //new HomezDbSource(this).setSwitchStatus(new Switchz(name, status));
 
             // reload list
-            switchzList = (ArrayList<Switchz>) new HomezDbSource(this).getAllSwitches();
-            switchListAdapter = new SwitchListAdapter(switchzList, this);
+            switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
+            switchListAdapter = new SwitchListAdapter(switchList, this);
             switchListView.setAdapter(switchListAdapter);
         } else {
             String message = "<font color=#000000>Seems we couldn't access the switch </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font>";
@@ -314,8 +314,8 @@ public class SwitchListActivity extends Activity {
         //new HomezDbSource(this).setSwitchStatus(new Switchz(name, status));
 
         // reload list
-        switchzList = (ArrayList<Switchz>) new HomezDbSource(this).getAllSwitches();
-        switchListAdapter = new SwitchListAdapter(switchzList, this);
+        switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
+        switchListAdapter = new SwitchListAdapter(switchList, this);
         switchListView.setAdapter(switchListAdapter);
     }
 
