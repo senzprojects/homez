@@ -9,8 +9,9 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.score.homez.R;
 import com.score.senz.ISenzService;
@@ -18,14 +19,16 @@ import com.score.senz.ISenzService;
 /**
  * Switch activity
  */
-public class SwitchActivity extends Activity {
+public class SwitchActivity extends Activity implements View.OnClickListener {
 
     // we use custom font here
     private Typeface typeface;
 
     // layout components
-    private ToggleButton switchButton;
-    private TextView switchText;
+    private RelativeLayout nightModeLayout;
+    private RelativeLayout visitorModeLayout;
+    private TextView nightModeText;
+    private TextView visitorModeText;
 
     // service interface
     private ISenzService senzService = null;
@@ -49,11 +52,11 @@ public class SwitchActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.switch_layout);
+        setContentView(R.layout.switch_board_layout);
 
+        bindSenzService();
         initUi();
         setupActionBar();
-        bindSenzService();
     }
 
     /**
@@ -75,14 +78,31 @@ public class SwitchActivity extends Activity {
     }
 
     /**
+     * Bind with senz service
+     */
+    private void bindSenzService() {
+        Intent intent = new Intent();
+        intent.setClassName("com.score.senz", "com.score.senz.services.RemoteSenzService");
+        bindService(intent, senzServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    /**
      * Initialize UI components
      */
     private void initUi() {
         typeface = Typeface.createFromAsset(getAssets(), "fonts/vegur_2.otf");
 
-        switchButton = (ToggleButton) findViewById(R.id.switch_night_mode);
-        switchText = (TextView) findViewById(R.id.switch_text);
-        switchText.setTypeface(typeface, Typeface.BOLD);
+        nightModeLayout = (RelativeLayout) findViewById(R.id.night_mode);
+        visitorModeLayout = (RelativeLayout) findViewById(R.id.visitor_mode);
+
+        nightModeText = (TextView) findViewById(R.id.night_mode_text);
+        visitorModeText = (TextView) findViewById(R.id.visitor_mode_text);
+
+        nightModeText.setTypeface(typeface, Typeface.BOLD);
+        visitorModeText.setTypeface(typeface, Typeface.BOLD);
+
+        nightModeLayout.setOnClickListener(this);
+        visitorModeLayout.setOnClickListener(this);
     }
 
     /**
@@ -98,16 +118,14 @@ public class SwitchActivity extends Activity {
         yourTextView.setTextColor(getResources().getColor(R.color.white));
         yourTextView.setTypeface(typeface);
 
-        getActionBar().setTitle("Night mode");
+        getActionBar().setTitle("Homez");
     }
 
     /**
-     * Bind with senz service
+     * {@inheritDoc}
      */
-    private void bindSenzService() {
-        Intent intent = new Intent();
-        intent.setClassName("com.score.senz", "com.score.senz.services.RemoteSenzService");
-        bindService(intent, senzServiceConnection, Context.BIND_AUTO_CREATE);
-    }
+    @Override
+    public void onClick(View v) {
 
+    }
 }

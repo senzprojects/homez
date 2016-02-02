@@ -8,39 +8,39 @@ import android.util.Log;
 /**
  * Created by namal on 11/16/15.
  */
-public class DBHelper extends SQLiteOpenHelper {
+public class HomezDbHelper extends SQLiteOpenHelper {
 
-    private static final String TAG = DBHelper.class.getName();
-    private static DBHelper dbHelper;
+    private static final String TAG = HomezDbHelper.class.getName();
+    private static HomezDbHelper dbHelper;
 
     private static final int DB_VERSION = 5;
     private static final String DB_NAME = "HomeZ.db";
 
     private static final String SQL_CREATE_SWITCH =
-            "CREATE TABLE " + DBContract.Switch.TABLE_NAME + " (" +
-                    DBContract.Switch._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + ", " +
-                    DBContract.Switch.COLUMN_NAME_NAME + " TEXT UNIQUE NOT NULL, " +
-                    DBContract.Switch.COLUMN_NAME_STATUS + " INT NOT NULL DEFAULT 0" +
+            "CREATE TABLE " + HomezDbContract.Switch.TABLE_NAME + " (" +
+                    HomezDbContract.Switch._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + ", " +
+                    HomezDbContract.Switch.COLUMN_NAME_NAME + " TEXT UNIQUE NOT NULL, " +
+                    HomezDbContract.Switch.COLUMN_NAME_STATUS + " INT NOT NULL DEFAULT 0" +
                     ")";
     private static final String SQL_CREATE_USER =
-            "CREATE TABLE " + DBContract.User.TABLE_NAME + " (" +
-                    DBContract.User._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + "," +
-                    DBContract.User.COLUMN_NAME_USERNAME + " TEXT UNIQUE NOT NULL" +
+            "CREATE TABLE " + HomezDbContract.User.TABLE_NAME + " (" +
+                    HomezDbContract.User._ID + " INTEGER PRIMARY KEY AUTOINCREMENT" + "," +
+                    HomezDbContract.User.COLUMN_NAME_USERNAME + " TEXT UNIQUE NOT NULL" +
                     ")";
 
     private static final String SQL_DELETE_SWITCH =
-            "DROP TABLE IF EXIST " + DBContract.Switch.TABLE_NAME;
+            "DROP TABLE IF EXIST " + HomezDbContract.Switch.TABLE_NAME;
 
     private static final String SQL_DELETE_USER =
-            "DROP TABLE IF EXIST " + DBContract.Switch.TABLE_NAME;
+            "DROP TABLE IF EXIST " + HomezDbContract.Switch.TABLE_NAME;
 
-    public DBHelper(Context context) {
+    public HomezDbHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
-    synchronized static DBHelper getInstance(Context context) {
+    synchronized static HomezDbHelper getInstance(Context context) {
         if (dbHelper == null) {
-            dbHelper = new DBHelper(context.getApplicationContext());
+            dbHelper = new HomezDbHelper(context.getApplicationContext());
         }
         return (dbHelper);
     }

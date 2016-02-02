@@ -7,10 +7,11 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.score.homez.R;
-import com.score.homez.db.DBSource;
+import com.score.homez.db.HomezDbSource;
 import com.score.homez.pojos.Switchz;
 import com.score.homez.services.SenzServiceConnection;
 import com.score.homez.utils.NotificationUtils;
+import com.score.homez.utils.PreferenceUtils;
 import com.score.senz.ISenzService;
 import com.score.senzc.enums.SenzTypeEnum;
 import com.score.senzc.pojos.Senz;
@@ -75,10 +76,11 @@ public class SenzHandler {
 
                 // if switches already exists in the db, SQLiteConstraintException should throw
                 try {
-                    DBSource dbSource = new DBSource(context);
+                    HomezDbSource dbSource = new HomezDbSource(context);
 
                     // create user first
                     dbSource.createUser(senz.getSender().getUsername());
+                    PreferenceUtils.saveUser(context, new User("1", senz.getSender().getUsername()));
                     Log.d(TAG, "created user with " + senz.getSender().getUsername());
 
                     // create switches then

@@ -5,8 +5,8 @@ import android.provider.BaseColumns;
 /**
  * Created by namal on 11/16/15.
  */
-public class DBContract {
-    public DBContract(){};
+public class HomezDbContract {
+    public HomezDbContract(){};
 
     public static abstract class Switch implements BaseColumns {
         public static final String TABLE_NAME = "switch";

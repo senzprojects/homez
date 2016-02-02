@@ -14,37 +14,37 @@ import java.util.List;
 /**
  * Created by namal on 11/16/15.
  */
-public class DBSource {
+public class HomezDbSource {
 
-    private static final String TAG = DBSource.class.getName();
+    private static final String TAG = HomezDbSource.class.getName();
     private static Context context;
 
-    public DBSource(Context context) {
+    public HomezDbSource(Context context) {
         Log.d(TAG, "Init: DB source");
         this.context = context;
     }
 
     public void createSwitch(Switchz switchz) {
         Log.d(TAG, "AddSwitch: adding switch - " + switchz.getName());
-        SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+        SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(DBContract.Switch.COLUMN_NAME_NAME, switchz.getName());
-        values.put(DBContract.Switch.COLUMN_NAME_STATUS, switchz.getStatus());
-        db.insertOrThrow(DBContract.Switch.TABLE_NAME, DBContract.Switch.COLUMN_NAME_NAME, values);
+        values.put(HomezDbContract.Switch.COLUMN_NAME_NAME, switchz.getName());
+        values.put(HomezDbContract.Switch.COLUMN_NAME_STATUS, switchz.getStatus());
+        db.insertOrThrow(HomezDbContract.Switch.TABLE_NAME, HomezDbContract.Switch.COLUMN_NAME_NAME, values);
         db.close();
     }
 
     public void setSwitchStatus(Switchz switchz) {
         Log.d(TAG, "Set status of switch " + switchz.getName() + " to " + switchz.getStatus());
-        SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+        SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(DBContract.Switch.COLUMN_NAME_STATUS, switchz.getStatus());
+        values.put(HomezDbContract.Switch.COLUMN_NAME_STATUS, switchz.getStatus());
 
-        db.update(DBContract.Switch.TABLE_NAME,
+        db.update(HomezDbContract.Switch.TABLE_NAME,
                 values,
-                DBContract.Switch.COLUMN_NAME_NAME + " = ?",
+                HomezDbContract.Switch.COLUMN_NAME_NAME + " = ?",
                 new String[]{switchz.getName()});
         db.close();
     }
@@ -53,8 +53,8 @@ public class DBSource {
         Log.d(TAG, "getting all switched");
         List<Switchz> switchList = new ArrayList<>();
 
-        SQLiteDatabase db = DBHelper.getInstance(context).getReadableDatabase();
-        Cursor cursor = db.query(DBContract.Switch.TABLE_NAME, null, null, null, null, null, null);
+        SQLiteDatabase db = HomezDbHelper.getInstance(context).getReadableDatabase();
+        Cursor cursor = db.query(HomezDbContract.Switch.TABLE_NAME, null, null, null, null, null, null);
 
         // switch attributes
         String _switchName;
@@ -62,8 +62,8 @@ public class DBSource {
 
         // extract attributes
         while (cursor.moveToNext()) {
-            _switchName = cursor.getString(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_NAME));
-            _status = cursor.getInt(cursor.getColumnIndex(DBContract.Switch.COLUMN_NAME_STATUS));
+            _switchName = cursor.getString(cursor.getColumnIndex(HomezDbContract.Switch.COLUMN_NAME_NAME));
+            _status = cursor.getInt(cursor.getColumnIndex(HomezDbContract.Switch.COLUMN_NAME_STATUS));
 
             switchList.add(new Switchz(_switchName, _status));
         }
@@ -84,14 +84,14 @@ public class DBSource {
      */
     public void createUser(String username) {
         Log.d(TAG, "AddUser: adding user - " + username);
-        SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
+        SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
 
         // content values to inset
         ContentValues values = new ContentValues();
-        values.put(DBContract.User.COLUMN_NAME_USERNAME, username);
+        values.put(HomezDbContract.User.COLUMN_NAME_USERNAME, username);
 
         // Insert the new row, if fails throw an error
-        db.insertOrThrow(DBContract.User.TABLE_NAME, DBContract.User.COLUMN_NAME_USERNAME, values);
+        db.insertOrThrow(HomezDbContract.User.TABLE_NAME, HomezDbContract.User.COLUMN_NAME_USERNAME, values);
         db.close();
     }
 
