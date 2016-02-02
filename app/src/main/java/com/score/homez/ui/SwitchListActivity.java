@@ -97,6 +97,9 @@ public class SwitchListActivity extends Activity {
         initUi();
         setupActionBar();
         popUpSwitchList();
+
+        // TODO update switch status on startup
+        //doGet(switchList);
     }
 
     /**
@@ -144,9 +147,10 @@ public class SwitchListActivity extends Activity {
      * Display switch list
      */
     private void popUpSwitchList() {
-        // get switch list via db
-        //switchzList = (ArrayList<Switchz>) new HomezDbSource(this).getAllSwitches();
+        // TODO get switch list via db
+        //switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
 
+        // TODO create sample list now, remove this
         switchList = new ArrayList<>();
         switchList.add(new Switch("Night", 1));
         switchList.add(new Switch("Day", 1));
@@ -178,7 +182,7 @@ public class SwitchListActivity extends Activity {
      *
      * @param aSwitch
      */
-    private void doPut(Switch aSwitch) {
+    public void doPut(Switch aSwitch) {
         // create put senz
         final Senz senz = SenzUtils.createPutSenz(aSwitch, this);
 

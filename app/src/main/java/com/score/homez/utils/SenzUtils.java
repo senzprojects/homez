@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class SenzUtils {
     public static Senz createPutSenz(Switch aSwitch, Context context) {
         HashMap<String, String> senzAttributes = new HashMap<>();
-        senzAttributes.put(aSwitch.getName(), aSwitch.getStatus() == 0 ? "on" : "off");
+        senzAttributes.put(aSwitch.getName(), aSwitch.getStatus() == 1 ? "on" : "off");
         senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
 
         try {

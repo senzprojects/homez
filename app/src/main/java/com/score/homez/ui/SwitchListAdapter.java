@@ -24,13 +24,13 @@ import java.util.ArrayList;
 public class SwitchListAdapter extends BaseAdapter {
 
     private ArrayList<Switch> switchList;
-    private Context context;
+    private SwitchListActivity activity;
     private Typeface typeface;
 
-    public SwitchListAdapter(ArrayList<Switch> switchList, Context context) {
+    public SwitchListAdapter(ArrayList<Switch> switchList, SwitchListActivity activity) {
         this.switchList = switchList;
-        this.context = context;
-        this.typeface = Typeface.createFromAsset(context.getAssets(), "fonts/vegur_2.otf");
+        this.activity = activity;
+        this.typeface = Typeface.createFromAsset(activity.getAssets(), "fonts/vegur_2.otf");
     }
 
     @Override
@@ -57,7 +57,7 @@ public class SwitchListAdapter extends BaseAdapter {
         final Switch aSwitch = (Switch) getItem(position);
 
         if (view == null) {
-            LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater layoutInflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = layoutInflater.inflate(R.layout.switch_list_row_layout, parent, false);
             holder = new ViewHolder();
             holder.switchName = (TextView) view.findViewById(R.id.name);
@@ -98,8 +98,8 @@ public class SwitchListAdapter extends BaseAdapter {
      *
      * @param message message to be display
      */
-    public void displayConfirmMessageDialog(String message, final ToggleButton toggleButton, Switch aSwitch) {
-        final Dialog dialog = new Dialog(context);
+    public void displayConfirmMessageDialog(String message, final ToggleButton toggleButton, final Switch aSwitch) {
+        final Dialog dialog = new Dialog(activity);
 
         //set layout for dialog
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -125,11 +125,13 @@ public class SwitchListAdapter extends BaseAdapter {
         okButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (toggleButton.isChecked()) {
-                    // send switch on
-
+                    // update switch status and send PUT with switch on
+                    aSwitch.setStatus(1);
+                    activity.doPut(aSwitch);
                 } else {
-                    // send switch off
-
+                    // update switch status and send PUT with switch off
+                    aSwitch.setStatus(0);
+                    activity.doPut(aSwitch);
                 }
                 dialog.cancel();
             }
