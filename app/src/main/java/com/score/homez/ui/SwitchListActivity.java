@@ -186,34 +186,37 @@ public class SwitchListActivity extends Activity {
         // create put senz
         final Senz senz = SenzUtils.createPutSenz(aSwitch, this);
 
-        putTimer = new CountDownTimer(16000, 5000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                if (!isResponseReceived) {
-                    Log.d(TAG, "Response not received yet");
+        if (senz != null) {
+            ActivityUtils.showProgressDialog(this, "Please wait...");
+            putTimer = new CountDownTimer(16000, 5000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    if (!isResponseReceived) {
+                        Log.d(TAG, "Response not received yet");
 
-                    // send put
-                    try {
-                        senzService.send(senz);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
+                        // send put
+                        try {
+                            senzService.send(senz);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFinish() {
-                ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
-                ActivityUtils.cancelProgressDialog();
+                @Override
+                public void onFinish() {
+                    ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
+                    ActivityUtils.cancelProgressDialog();
 
-                // display message dialog that we couldn't reach the user
-                if (!isResponseReceived) {
-                    String message = "<font color=#000000>Seems we couldn't reach the home </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font> <font color=#000000> at this moment</font>";
-                    displayInformationMessageDialog("#PUT Fail", message);
+                    // display message dialog that we couldn't reach the user
+                    if (!isResponseReceived) {
+                        String message = "<font color=#000000>Seems we couldn't reach the home </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font> <font color=#000000> at this moment</font>";
+                        displayInformationMessageDialog("#PUT Fail", message);
+                    }
                 }
-            }
-        };
-        putTimer.start();
+            };
+            putTimer.start();
+        }
     }
 
     /**
@@ -225,34 +228,36 @@ public class SwitchListActivity extends Activity {
         // create get senz
         final Senz senz = SenzUtils.createGetSenz(switchList, this);
 
-        getTimer = new CountDownTimer(16000, 5000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                if (!isResponseReceived) {
-                    Log.d(TAG, "Response not received yet");
+        if (senz != null) {
+            getTimer = new CountDownTimer(16000, 5000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    if (!isResponseReceived) {
+                        Log.d(TAG, "Response not received yet");
 
-                    // send get
-                    try {
-                        senzService.send(senz);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
+                        // send get
+                        try {
+                            senzService.send(senz);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFinish() {
-                ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
-                ActivityUtils.cancelProgressDialog();
+                @Override
+                public void onFinish() {
+                    ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
+                    ActivityUtils.cancelProgressDialog();
 
-                // display message dialog that we couldn't reach the user
-                if (!isResponseReceived) {
-                    String message = "<font color=#000000>Seems we couldn't reach the home </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font> <font color=#000000> at this moment</font>";
-                    displayInformationMessageDialog("#PUT Fail", message);
+                    // display message dialog that we couldn't reach the user
+                    if (!isResponseReceived) {
+                        String message = "<font color=#000000>Seems we couldn't reach the home </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font> <font color=#000000> at this moment</font>";
+                        displayInformationMessageDialog("#PUT Fail", message);
+                    }
                 }
-            }
-        };
-        getTimer.start();
+            };
+            getTimer.start();
+        }
     }
 
     /**
