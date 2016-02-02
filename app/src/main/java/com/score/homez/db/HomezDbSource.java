@@ -24,6 +24,11 @@ public class HomezDbSource {
         this.context = context;
     }
 
+    /**
+     * Create switch
+     *
+     * @param aSwitch switch
+     */
     public void createSwitch(Switch aSwitch) {
         Log.d(TAG, "AddSwitch: adding switch - " + aSwitch.getName());
         SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
@@ -35,6 +40,11 @@ public class HomezDbSource {
         db.close();
     }
 
+    /**
+     * Update status of the switch
+     *
+     * @param aSwitch switch
+     */
     public void setSwitchStatus(Switch aSwitch) {
         Log.d(TAG, "Set status of switch " + aSwitch.getName() + " to " + aSwitch.getStatus());
         SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
@@ -49,6 +59,11 @@ public class HomezDbSource {
         db.close();
     }
 
+    /**
+     * Find all switches
+     *
+     * @return switch list
+     */
     public List<Switch> getAllSwitches() {
         Log.d(TAG, "getting all switched");
         List<Switch> switchList = new ArrayList<>();

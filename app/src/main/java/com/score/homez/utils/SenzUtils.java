@@ -15,6 +15,13 @@ import java.util.HashMap;
  * Created by eranga on 2/2/16.
  */
 public class SenzUtils {
+    /**
+     * Create PUT senz via switch
+     *
+     * @param aSwitch switch
+     * @param context context
+     * @return senz
+     */
     public static Senz createPutSenz(Switch aSwitch, Context context) {
         HashMap<String, String> senzAttributes = new HashMap<>();
         senzAttributes.put(aSwitch.getName(), aSwitch.getStatus() == 1 ? "on" : "off");
@@ -37,6 +44,13 @@ public class SenzUtils {
         return null;
     }
 
+    /**
+     * Create GET senz to find status of the switches
+     *
+     * @param switchList switch list
+     * @param context    context
+     * @return senz
+     */
     public static Senz createGetSenz(ArrayList<Switch> switchList, Context context) {
         return null;
     }
