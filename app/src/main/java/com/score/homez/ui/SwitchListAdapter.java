@@ -78,7 +78,7 @@ public class SwitchListAdapter extends BaseAdapter {
         holder.switchToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayDeleteMessageDialog("Are you sure you want to switch [" + (holder.switchToggle.isChecked() ? "ON" : "OFF") + "] " + "the switch", holder.switchToggle, switchz);
+                displayConfirmMessageDialog("<font color=#000000>Are you sure you want to switch </font><font color=#eada00><b> [" + (holder.switchToggle.isChecked() ? "ON" : "OFF") + "] </b></font>" + "the switch", holder.switchToggle, switchz);
             }
         });
 
@@ -98,13 +98,14 @@ public class SwitchListAdapter extends BaseAdapter {
      *
      * @param message message to be display
      */
-    public void displayDeleteMessageDialog(String message, final ToggleButton toggleButton, Switchz switchz) {
+    public void displayConfirmMessageDialog(String message, final ToggleButton toggleButton, Switchz switchz) {
         final Dialog dialog = new Dialog(context);
 
         //set layout for dialog
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.confirm_message_dialog_layout);
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.setCanceledOnTouchOutside(false);
         dialog.setCancelable(true);
 
         // set dialog texts

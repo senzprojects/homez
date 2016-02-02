@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import com.score.homez.R;
-import com.score.homez.ui.HomeActivity;
+import com.score.homez.ui.SwitchListActivity;
 
 /**
  * Utility class for create and update notifications
@@ -30,7 +30,7 @@ public class NotificationUtils {
      */
     public static Notification getNotification(Context context, int icon, String title, String message) {
         // set up pending intent
-        Intent intent = new Intent(context, HomeActivity.class);
+        Intent intent = new Intent(context, SwitchListActivity.class);
         intent.setAction(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
