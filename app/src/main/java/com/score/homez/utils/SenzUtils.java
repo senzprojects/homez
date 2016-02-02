@@ -34,7 +34,6 @@ public class SenzUtils {
             e.printStackTrace();
         }
 
-        //return new Senz("1", "sdfsd", SenzTypeEnum.PUT, new User("2", "era"), new User("2", "ban"), senzAttributes);
         return null;
     }
 
