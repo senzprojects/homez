@@ -27,7 +27,7 @@ public class HomezDbSource {
     /**
      * Create switch
      *
-     * @param aSwitch switch
+     * @param aSwitch switch  db.insertOrThrow(HomezDbContract.Switch.TABLE_NAME, HomezDbContract.Switch.COLUMN_NAME_NAME, values);
      */
     public void createSwitch(Switch aSwitch) {
         Log.d(TAG, "AddSwitch: adding switch - " + aSwitch.getName());
@@ -102,12 +102,36 @@ public class HomezDbSource {
         SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
 
         // content values to inset
+
         ContentValues values = new ContentValues();
         values.put(HomezDbContract.User.COLUMN_NAME_USERNAME, username);
 
         // Insert the new row, if fails throw an error
+        //db.insertOrThrow(HomezDbContract.Switch.TABLE_NAME, HomezDbContract.Switch.COLUMN_NAME_NAME, values);
         db.insertOrThrow(HomezDbContract.User.TABLE_NAME, HomezDbContract.User.COLUMN_NAME_USERNAME, values);
         db.close();
+    }
+
+    public String getDevice() {
+        Log.d(TAG, "Read device name ");
+        SQLiteDatabase db = HomezDbHelper.getInstance(context).getReadableDatabase();
+        Cursor cursor = db.query(HomezDbContract.User.TABLE_NAME, null, null, null, null, null, null);
+        // read device name
+        String _deviceName="";
+        if (cursor.moveToNext())
+        _deviceName = cursor.getString(cursor.getColumnIndex(HomezDbContract.User.COLUMN_NAME_USERNAME));
+        return _deviceName;
+    }
+    public  void deleteUser(String username){
+        Log.d(TAG, "Dumping User from DB");
+        SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
+        db.delete(HomezDbContract.User.TABLE_NAME,HomezDbContract.User.COLUMN_NAME_USERNAME,new String[]{username});
+    }
+
+    public  void deleteSwitches(){
+        Log.d(TAG, "Dumping Database");
+        SQLiteDatabase db = HomezDbHelper.getInstance(context).getWritableDatabase();
+        db.delete(HomezDbContract.Switch.TABLE_NAME, null, null);
     }
 
 }

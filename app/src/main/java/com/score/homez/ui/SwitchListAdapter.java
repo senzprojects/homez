@@ -78,7 +78,16 @@ public class SwitchListAdapter extends BaseAdapter {
         holder.switchToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayConfirmMessageDialog("<font color=#000000>Are you sure you want to switch </font><font color=#eada00><b> [" + (holder.switchToggle.isChecked() ? "ON" : "OFF") + "] </b></font>" + "the switch", holder.switchToggle, aSwitch);
+                if (holder.switchToggle.isChecked()) {
+                    // update switch status and send PUT with switch on
+                    aSwitch.setStatus(0);
+                    activity.doPut(aSwitch);
+                } else {
+                    // update switch status and send PUT with switch off
+                    aSwitch.setStatus(1);
+                    activity.doPut(aSwitch);
+                }
+              //  displayConfirmMessageDialog("<font color=#000000>Are you sure you want to switch </font><font color=#eada00><b> [" + (holder.switchToggle.isChecked() ? "ON" : "OFF") + "] </b></font>" + "the switch", holder.switchToggle, aSwitch);
             }
         });
 
@@ -122,6 +131,7 @@ public class SwitchListAdapter extends BaseAdapter {
         Button okButton = (Button) dialog.findViewById(R.id.information_message_dialog_layout_ok_button);
         okButton.setTypeface(typeface);
         okButton.setTypeface(null, Typeface.BOLD);
+
         okButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (toggleButton.isChecked()) {

@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.Html;
@@ -31,6 +32,8 @@ import com.score.senz.ISenzService;
 import com.score.senzc.pojos.Senz;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Switch activity
@@ -56,6 +59,7 @@ public class SwitchListActivity extends Activity {
 
     // keep track with weather response received
     private boolean isResponseReceived = false;
+    private boolean isTimerNotStarted=true;
 
     // timers fot get/put
     private CountDownTimer getTimer;
@@ -78,7 +82,7 @@ public class SwitchListActivity extends Activity {
     private BroadcastReceiver senzMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "Got message from Senz service");
+            Log.d(TAG, "Got message from Senz service *** ");
             handleMessage(intent);
         }
     };
@@ -98,7 +102,6 @@ public class SwitchListActivity extends Activity {
         setupActionBar();
         popUpSwitchList();
 
-        // TODO update switch status on startup
         //doGet(switchList);
     }
 
@@ -152,9 +155,15 @@ public class SwitchListActivity extends Activity {
 
         // TODO create sample list now, remove this
         switchList = new ArrayList<>();
-        switchList.add(new Switch("Night", 1));
-        switchList.add(new Switch("Day", 1));
-        switchList.add(new Switch("Visitor", 0));
+        HomezDbSource dbSource = new HomezDbSource(this);
+        List<Switch> sw= dbSource.getAllSwitches();
+        if (!sw.isEmpty()) {
+           for(Switch s:sw) {
+               switchList.add(new Switch(s.getName(),s.getStatus()));
+           }
+        }
+        //switchList.add(new Switch("Day", 1));
+        //switchList.add(new Switch("Visitor", 0));
 
         switchListAdapter = new SwitchListAdapter(switchList, this);
         switchListAdapter.notifyDataSetChanged();
@@ -185,7 +194,7 @@ public class SwitchListActivity extends Activity {
     public void doPut(Switch aSwitch) {
         // create put senz
         final Senz senz = SenzUtils.createPutSenz(aSwitch, this);
-
+        isResponseReceived = false;
         if (senz != null) {
             ActivityUtils.showProgressDialog(this, "Please wait...");
             putTimer = new CountDownTimer(16000, 5000) {
@@ -207,15 +216,17 @@ public class SwitchListActivity extends Activity {
                 public void onFinish() {
                     ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
                     ActivityUtils.cancelProgressDialog();
-
+                    isTimerNotStarted=true;
                     // display message dialog that we couldn't reach the user
                     if (!isResponseReceived) {
+                        isResponseReceived = true;
                         String message = "<font color=#000000>Seems we couldn't reach the home </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font> <font color=#000000> at this moment</font>";
                         displayInformationMessageDialog("#PUT Fail", message);
                     }
                 }
             };
             putTimer.start();
+
         }
     }
 
@@ -272,19 +283,19 @@ public class SwitchListActivity extends Activity {
         if (action.equalsIgnoreCase("com.score.senz.DATA_SENZ")) {
             Senz senz = intent.getExtras().getParcelable("SENZ");
 
-            if (senz.getAttributes().containsKey("msg")) {
+            if (senz.getAttributes().containsValue("PutDone")) {
                 // response received for PUT senz
                 ActivityUtils.cancelProgressDialog();
                 isResponseReceived = true;
-
+                Log.d(TAG, "PutResponse received");
                 onPostPut(senz);
-            } else if (senz.getAttributes().containsKey("#nightmode") || senz.getAttributes().containsKey("#visitormode")) {
+            } /*else if (senz.getAttributes().containsValue("GetResponse")) {
                 // response received for GET senz
                 ActivityUtils.cancelProgressDialog();
                 isResponseReceived = true;
-
+                Log.d(TAG, "Getresponse received -----");
                 onPostGet(senz);
-            }
+            }*/
         }
     }
 
@@ -296,19 +307,18 @@ public class SwitchListActivity extends Activity {
     private void onPostPut(Senz senz) {
         putTimer.cancel();
 
-        String msg = senz.getAttributes().get("msg");
-        if (msg != null && msg.equalsIgnoreCase("PutDone")) {
-            // TODO update switch in db
-            //new HomezDbSource(this).setSwitchStatus(new Switchz(name, status));
-
-            // reload list
-            switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
-            switchListAdapter = new SwitchListAdapter(switchList, this);
-            switchListView.setAdapter(switchListAdapter);
-        } else {
-            String message = "<font color=#000000>Seems we couldn't access the switch </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font>";
-            displayInformationMessageDialog("#PUT Fail", message);
+        // TODO update switch in db
+        HomezDbSource dbSource = new HomezDbSource(this);
+        for (String key : senz.getAttributes().keySet()) {
+            if (!key.equals("time") && !key.equals("msg")) {
+                int status = senz.getAttributes().get(key).equals("on") ? 1 : 0;
+                dbSource.setSwitchStatus(new Switch(key, status));
+                Log.d(TAG, "Update switch status ** " + senz.getAttributes().get(key));
+            }
         }
+        // reload list
+        popUpSwitchList();
+
     }
 
     /**
@@ -321,11 +331,21 @@ public class SwitchListActivity extends Activity {
 
         // TODO update switch status in DB
         //new HomezDbSource(this).setSwitchStatus(new Switchz(name, status));
+        // create switches then
+        HomezDbSource dbSource = new HomezDbSource(this);
+        for (HashMap.Entry<String,String> entry:senz.getAttributes().entrySet()) {
+            if (!entry.getKey().equals("time") || !entry.getKey().equals("homez")) {
+                int status = entry.getKey().equals("1") ? 1 : 0;
+                dbSource.setSwitchStatus(new Switch(entry.getKey(),status));
+                Log.d(TAG, "Update switch status ");
+            }
+        }
 
         // reload list
-        switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
-        switchListAdapter = new SwitchListAdapter(switchList, this);
-        switchListView.setAdapter(switchListAdapter);
+        popUpSwitchList();
+        //switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
+        //switchListAdapter = new SwitchListAdapter(switchList, this);
+        //switchListView.setAdapter(switchListAdapter);
     }
 
     /**

@@ -8,16 +8,20 @@ import android.util.Log;
 
 import com.score.homez.R;
 import com.score.homez.db.HomezDbSource;
+import com.score.homez.exceptions.NoUserException;
 import com.score.homez.pojos.Switch;
 import com.score.homez.services.SenzServiceConnection;
+import com.score.homez.ui.SwitchListActivity;
 import com.score.homez.utils.NotificationUtils;
 import com.score.homez.utils.PreferenceUtils;
+import com.score.homez.utils.SenzUtils;
 import com.score.senz.ISenzService;
 import com.score.senzc.enums.SenzTypeEnum;
 import com.score.senzc.pojos.Senz;
 import com.score.senzc.pojos.User;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by eranga on 11/26/15.
@@ -54,20 +58,24 @@ public class SenzHandler {
         switch (senz.getSenzType()) {
             case SHARE:
                 Log.e(TAG, "SHARE received");
-                if (senz.getAttributes().containsKey("NightMode") || senz.getAttributes().containsKey("NightMode")) {
-                    Log.e(TAG, "SHARE received with NightMode and VisitorMode");
-                    handleShareSenz(senz);
+                HomezDbSource dbSource = new HomezDbSource(context);
+                String dname=dbSource.getDevice();
+                if(senz.getSender().getUsername().equals(dname)){
+                    dbSource.deleteSwitches();
+                    handleShareSenz(senz,false);
+                }else{
+                    handleShareSenz(senz,true);
                 }
-
                 break;
             case DATA:
                 Log.e(TAG, "DATA received");
                 handleDataSenz(senz);
                 break;
         }
+
     }
 
-    private void handleShareSenz(final Senz senz) {
+    private void handleShareSenz(final Senz senz, final boolean intial) {
         serviceConnection.executeAfterServiceConnected(new Runnable() {
             @Override
             public void run() {
@@ -77,22 +85,26 @@ public class SenzHandler {
                 // if switches already exists in the db, SQLiteConstraintException should throw
                 try {
                     HomezDbSource dbSource = new HomezDbSource(context);
-
                     // create user first
-                    dbSource.createUser(senz.getSender().getUsername());
+                    if(intial) dbSource.createUser(senz.getSender().getUsername());
                     PreferenceUtils.saveUser(context, new User("1", senz.getSender().getUsername()));
                     Log.d(TAG, "created user with " + senz.getSender().getUsername());
 
                     // create switches then
                     for (String key : senz.getAttributes().keySet()) {
-                        dbSource.createSwitch(new Switch(key, 0));
-
-                        Log.d(TAG, "created switch with " + key);
+                        if(!key.equals("time") && !key.equals("homez")){
+                            dbSource.createSwitch(new Switch(key, 0));
+                            Log.d(TAG, "created switch with " + key);
+                        }
                     }
+                    NotificationUtils.showNotification(context, context.getString(R.string.new_senz),
+                            "HomeZ received list of switches from @" + senz.getSender().getUsername());
 
-                    NotificationUtils.showNotification(context, context.getString(R.string.new_senz), "HomeZ received from @" + senz.getSender().getUsername());
                     sendResponse(senzService, senz.getSender(), true);
+
                 } catch (SQLiteConstraintException e) {
+                    NotificationUtils.showNotification(context, context.getString(R.string.new_senz),
+                            "HomeZ received list of switches from @" + senz.getSender().getUsername());
                     sendResponse(senzService, senz.getSender(), false);
                     Log.e(TAG, e.toString());
                 }
@@ -119,6 +131,8 @@ public class SenzHandler {
             e.printStackTrace();
         }
     }
+
+
 
     private void handleDataSenz(Senz senz) {
         Log.d(TAG, "Nothing to handle data senz here, already broadcast");
