@@ -97,6 +97,7 @@ public class SenzHandler {
                             Log.d(TAG, "created switch with " + key);
                         }
                     }
+
                     NotificationUtils.showNotification(context, context.getString(R.string.new_senz),
                             "HomeZ received list of switches from @" + senz.getSender().getUsername());
 

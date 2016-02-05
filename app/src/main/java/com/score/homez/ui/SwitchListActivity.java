@@ -11,7 +11,6 @@ import android.content.ServiceConnection;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.Html;
@@ -59,7 +58,7 @@ public class SwitchListActivity extends Activity {
 
     // keep track with weather response received
     private boolean isResponseReceived = false;
-    private boolean isTimerNotStarted=true;
+    private boolean isTimerNotStarted = true;
 
     // timers fot get/put
     private CountDownTimer getTimer;
@@ -114,6 +113,17 @@ public class SwitchListActivity extends Activity {
      * {@inheritDoc}
      */
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        // reload list
+        popUpSwitchList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -154,7 +164,7 @@ public class SwitchListActivity extends Activity {
     /**
      * Display switch list
      */
-    private void popUpSwitchList() {
+    public void popUpSwitchList() {
         // Create sample list now
         switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
 
@@ -333,10 +343,10 @@ public class SwitchListActivity extends Activity {
         //new HomezDbSource(this).setSwitchStatus(new Switchz(name, status));
         // create switches then
         HomezDbSource dbSource = new HomezDbSource(this);
-        for (HashMap.Entry<String,String> entry:senz.getAttributes().entrySet()) {
+        for (HashMap.Entry<String, String> entry : senz.getAttributes().entrySet()) {
             if (!entry.getKey().equals("time") || !entry.getKey().equals("homez")) {
                 int status = entry.getKey().equals("1") ? 1 : 0;
-                dbSource.setSwitchStatus(new Switch(entry.getKey(),status));
+                dbSource.setSwitchStatus(new Switch(entry.getKey(), status));
                 Log.d(TAG, "Update switch status ");
             }
         }

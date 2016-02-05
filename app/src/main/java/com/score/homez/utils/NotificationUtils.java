@@ -31,9 +31,9 @@ public class NotificationUtils {
     public static Notification getNotification(Context context, int icon, String title, String message) {
         // set up pending intent
         Intent intent = new Intent(context, SwitchListActivity.class);
-        intent.setAction(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // build notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
