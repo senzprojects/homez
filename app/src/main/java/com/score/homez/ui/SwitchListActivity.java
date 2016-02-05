@@ -63,7 +63,9 @@ public class SwitchListActivity extends Activity {
 
     // timers fot get/put
     private CountDownTimer getTimer;
-    private CountDownTimer putTimer;
+
+    //private CountDownTimer putTimer;
+    private HashMap<String,CountDownTimer> timerList=new HashMap();
 
     // service connection
     private ServiceConnection senzServiceConnection = new ServiceConnection() {
@@ -102,6 +104,9 @@ public class SwitchListActivity extends Activity {
         setupActionBar();
         popUpSwitchList();
 
+        for(Switch aSwitch:switchList){
+            doPut(aSwitch);
+        }
         //doGet(switchList);
     }
 
@@ -150,20 +155,8 @@ public class SwitchListActivity extends Activity {
      * Display switch list
      */
     private void popUpSwitchList() {
-        // TODO get switch list via db
-        //switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
-
-        // TODO create sample list now, remove this
-        switchList = new ArrayList<>();
-        HomezDbSource dbSource = new HomezDbSource(this);
-        List<Switch> sw= dbSource.getAllSwitches();
-        if (!sw.isEmpty()) {
-           for(Switch s:sw) {
-               switchList.add(new Switch(s.getName(),s.getStatus()));
-           }
-        }
-        //switchList.add(new Switch("Day", 1));
-        //switchList.add(new Switch("Visitor", 0));
+        // Create sample list now
+        switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
 
         switchListAdapter = new SwitchListAdapter(switchList, this);
         switchListAdapter.notifyDataSetChanged();
@@ -194,15 +187,18 @@ public class SwitchListActivity extends Activity {
     public void doPut(Switch aSwitch) {
         // create put senz
         final Senz senz = SenzUtils.createPutSenz(aSwitch, this);
-        isResponseReceived = false;
+        //Timer is used to identified the SenZ
+        final String timerID=senz.getAttributes().get("time");
         if (senz != null) {
+            ActivityUtils.cancelProgressDialog();
             ActivityUtils.showProgressDialog(this, "Please wait...");
-            putTimer = new CountDownTimer(16000, 5000) {
+            timerList.put(timerID, new CountDownTimer(16000, 5000) {
+                //putTimer = new CountDownTimer(16000, 5000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    if (!isResponseReceived) {
+                    //if (!isResponseReceived) {
+                    if (timerList.containsKey(timerID)) {
                         Log.d(TAG, "Response not received yet");
-
                         // send put
                         try {
                             senzService.send(senz);
@@ -216,16 +212,18 @@ public class SwitchListActivity extends Activity {
                 public void onFinish() {
                     ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
                     ActivityUtils.cancelProgressDialog();
-                    isTimerNotStarted=true;
                     // display message dialog that we couldn't reach the user
-                    if (!isResponseReceived) {
-                        isResponseReceived = true;
-                        String message = "<font color=#000000>Seems we couldn't reach the home </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font> <font color=#000000> at this moment</font>";
+                    //if (!isResponseReceived) {
+                    if (timerList.containsKey(timerID)) {
+                        //isResponseReceived = true;
+                        timerList.remove(timerID);
+                        String message = "<font color=#000000>Seems we couldn't reach </font> <font color=#eada00>" +
+                                "<b>" +senz.getReceiver().getUsername() + "</b>" + "</font> <font color=#000000> at this moment</font>";
                         displayInformationMessageDialog("#PUT Fail", message);
                     }
                 }
-            };
-            putTimer.start();
+            });
+            timerList.get(timerID).start();
 
         }
     }
@@ -282,13 +280,16 @@ public class SwitchListActivity extends Activity {
 
         if (action.equalsIgnoreCase("com.score.senz.DATA_SENZ")) {
             Senz senz = intent.getExtras().getParcelable("SENZ");
-
+            String timerID=senz.getAttributes().get("time");
             if (senz.getAttributes().containsValue("PutDone")) {
                 // response received for PUT senz
-                ActivityUtils.cancelProgressDialog();
-                isResponseReceived = true;
-                Log.d(TAG, "PutResponse received");
-                onPostPut(senz);
+                if(timerList.containsKey(timerID)) {
+                    ActivityUtils.cancelProgressDialog();
+                    timerList.get(timerID).cancel();
+                    timerList.remove(timerID);
+                    Log.d(TAG, "PutResponse received " + timerID);
+                    onPostPut(senz);
+                }
             } /*else if (senz.getAttributes().containsValue("GetResponse")) {
                 // response received for GET senz
                 ActivityUtils.cancelProgressDialog();
@@ -305,8 +306,7 @@ public class SwitchListActivity extends Activity {
      * @param senz
      */
     private void onPostPut(Senz senz) {
-        putTimer.cancel();
-
+        //putTimer.cancel();
         // TODO update switch in db
         HomezDbSource dbSource = new HomezDbSource(this);
         for (String key : senz.getAttributes().keySet()) {

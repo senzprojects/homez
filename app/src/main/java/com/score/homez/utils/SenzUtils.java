@@ -28,7 +28,7 @@ public class SenzUtils {
     public static Senz createPutSenz(Switch aSwitch, Context context) {
         HashMap<String, String> senzAttributes = new HashMap<>();
         senzAttributes.put(aSwitch.getName(), aSwitch.getStatus() == 1 ? "off" : "on");
-        senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
+        senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 10)).toString());
 
         try {
             // get receiver
@@ -52,7 +52,7 @@ public class SenzUtils {
         for(Switch aSwitch:switchList) {
             senzAttributes.put(aSwitch.getName(), aSwitch.getStatus() == 1 ? "off" : "on");
         }
-        senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
+        senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 10)).toString());
 
         try {
             // get receiver
@@ -90,7 +90,7 @@ public class SenzUtils {
             HashMap<String, String> senzAttributes = new HashMap<>();
             if (!sw.isEmpty())
                 for(Switch s:sw) senzAttributes.put(s.getName(),"");
-            senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 1000)).toString());
+            senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 10)).toString());
             return new Senz(id, signature, senzType, null, receiver, senzAttributes);
         } catch (NoUserException e) {
             e.printStackTrace();
