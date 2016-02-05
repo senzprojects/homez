@@ -11,7 +11,6 @@ import android.content.ServiceConnection;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.Html;
@@ -59,7 +58,7 @@ public class SwitchListActivity extends Activity {
 
     // keep track with weather response received
     private boolean isResponseReceived = false;
-    private boolean isTimerNotStarted=true;
+    private boolean isTimerNotStarted = true;
 
     // timers fot get/put
     private CountDownTimer getTimer;
@@ -103,6 +102,17 @@ public class SwitchListActivity extends Activity {
         popUpSwitchList();
 
         //doGet(switchList);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        // reload list
+        popUpSwitchList();
     }
 
     /**
@@ -156,11 +166,11 @@ public class SwitchListActivity extends Activity {
         // TODO create sample list now, remove this
         switchList = new ArrayList<>();
         HomezDbSource dbSource = new HomezDbSource(this);
-        List<Switch> sw= dbSource.getAllSwitches();
+        List<Switch> sw = dbSource.getAllSwitches();
         if (!sw.isEmpty()) {
-           for(Switch s:sw) {
-               switchList.add(new Switch(s.getName(),s.getStatus()));
-           }
+            for (Switch s : sw) {
+                switchList.add(new Switch(s.getName(), s.getStatus()));
+            }
         }
         //switchList.add(new Switch("Day", 1));
         //switchList.add(new Switch("Visitor", 0));
@@ -216,7 +226,7 @@ public class SwitchListActivity extends Activity {
                 public void onFinish() {
                     ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
                     ActivityUtils.cancelProgressDialog();
-                    isTimerNotStarted=true;
+                    isTimerNotStarted = true;
                     // display message dialog that we couldn't reach the user
                     if (!isResponseReceived) {
                         isResponseReceived = true;
@@ -333,10 +343,10 @@ public class SwitchListActivity extends Activity {
         //new HomezDbSource(this).setSwitchStatus(new Switchz(name, status));
         // create switches then
         HomezDbSource dbSource = new HomezDbSource(this);
-        for (HashMap.Entry<String,String> entry:senz.getAttributes().entrySet()) {
+        for (HashMap.Entry<String, String> entry : senz.getAttributes().entrySet()) {
             if (!entry.getKey().equals("time") || !entry.getKey().equals("homez")) {
                 int status = entry.getKey().equals("1") ? 1 : 0;
-                dbSource.setSwitchStatus(new Switch(entry.getKey(),status));
+                dbSource.setSwitchStatus(new Switch(entry.getKey(), status));
                 Log.d(TAG, "Update switch status ");
             }
         }
