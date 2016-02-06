@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -32,7 +34,6 @@ import com.score.senzc.pojos.Senz;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Switch activity
@@ -64,7 +65,7 @@ public class SwitchListActivity extends Activity {
     private CountDownTimer getTimer;
 
     //private CountDownTimer putTimer;
-    private HashMap<String,CountDownTimer> timerList=new HashMap();
+    private HashMap<String, CountDownTimer> timerList = new HashMap();
 
     // service connection
     private ServiceConnection senzServiceConnection = new ServiceConnection() {
@@ -103,7 +104,7 @@ public class SwitchListActivity extends Activity {
         setupActionBar();
         popUpSwitchList();
 
-        for(Switch aSwitch:switchList){
+        for (Switch aSwitch : switchList) {
             doPut(aSwitch);
         }
         //doGet(switchList);
@@ -198,7 +199,7 @@ public class SwitchListActivity extends Activity {
         // create put senz
         final Senz senz = SenzUtils.createPutSenz(aSwitch, this);
         //Timer is used to identified the SenZ
-        final String timerID=senz.getAttributes().get("time");
+        final String timerID = senz.getAttributes().get("time");
         if (senz != null) {
             ActivityUtils.cancelProgressDialog();
             ActivityUtils.showProgressDialog(this, "Please wait...");
@@ -228,7 +229,7 @@ public class SwitchListActivity extends Activity {
                         //isResponseReceived = true;
                         timerList.remove(timerID);
                         String message = "<font color=#000000>Seems we couldn't reach </font> <font color=#eada00>" +
-                                "<b>" +senz.getReceiver().getUsername() + "</b>" + "</font> <font color=#000000> at this moment</font>";
+                                "<b>" + senz.getReceiver().getUsername() + "</b>" + "</font> <font color=#000000> at this moment</font>";
                         displayInformationMessageDialog("#PUT Fail", message);
                     }
                 }
@@ -290,10 +291,10 @@ public class SwitchListActivity extends Activity {
 
         if (action.equalsIgnoreCase("com.score.senz.DATA_SENZ")) {
             Senz senz = intent.getExtras().getParcelable("SENZ");
-            String timerID=senz.getAttributes().get("time");
+            String timerID = senz.getAttributes().get("time");
             if (senz.getAttributes().containsValue("PutDone")) {
                 // response received for PUT senz
-                if(timerList.containsKey(timerID)) {
+                if (timerList.containsKey(timerID)) {
                     ActivityUtils.cancelProgressDialog();
                     timerList.get(timerID).cancel();
                     timerList.remove(timerID);
@@ -385,6 +386,46 @@ public class SwitchListActivity extends Activity {
 
         //set ok button
         Button okButton = (Button) dialog.findViewById(R.id.information_message_dialog_layout_ok_button);
+        okButton.setTypeface(typeface);
+        okButton.setTypeface(null, Typeface.BOLD);
+        okButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                dialog.cancel();
+            }
+        });
+
+        dialog.show();
+    }
+
+
+    /**
+     * Display home light image
+     * TODO class this function when receives the image
+     *
+     * @param title    title
+     * @param drawable image
+     */
+    public void displayImageDialog(String title, Drawable drawable) {
+        final Dialog dialog = new Dialog(this);
+
+        //set layout for dialog
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.image_dialog_layout);
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(true);
+
+        // set dialog texts
+        TextView messageHeaderTextView = (TextView) dialog.findViewById(R.id.image_dialog_layout_message_header_text);
+        messageHeaderTextView.setText(title);
+        messageHeaderTextView.setTypeface(typeface);
+
+        // set image
+        ImageView imageView = (ImageView) dialog.findViewById(R.id.image_dialog_layout_light_image);
+        imageView.setBackground(drawable);
+
+        //set ok button
+        Button okButton = (Button) dialog.findViewById(R.id.image_dialog_layout_ok_button);
         okButton.setTypeface(typeface);
         okButton.setTypeface(null, Typeface.BOLD);
         okButton.setOnClickListener(new View.OnClickListener() {
