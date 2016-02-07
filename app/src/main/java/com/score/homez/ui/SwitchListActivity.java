@@ -8,13 +8,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.Html;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +67,9 @@ public class SwitchListActivity extends Activity {
 
     // timers fot get/put
     private CountDownTimer getTimer;
+
+    private String photoString="";
+    private String lastTimerID="";
 
     //private CountDownTimer putTimer;
     private HashMap<String, CountDownTimer> timerList = new HashMap();
@@ -323,8 +330,9 @@ public class SwitchListActivity extends Activity {
                     ActivityUtils.cancelProgressDialog();
                     timerList.get(timerID).cancel();
                     timerList.remove(timerID);
-                    onPostPhoto(senz);
                 }
+                onPostPhoto(senz, timerID);
+                lastTimerID=timerID;
             }else if (senz.getAttributes().containsValue("GetResponse")) {
                 // response received for GET senz
                 if (timerList.containsKey(timerID)) {
@@ -376,13 +384,25 @@ public class SwitchListActivity extends Activity {
                 Log.d(TAG, "GET: Update switch status ** " + senz.getAttributes().get(key));
             }
         }
-        // reload list
         popUpSwitchList();
     }
 
-    private void onPostPhoto(Senz senz) {
+    private void onPostPhoto(Senz senz,String timeID) {
         // TODO update switch status in DB
-        Log.d(TAG, "Photo received " + senz.getAttributes().get("photo"));
+        if (senz.getAttributes().get("photo").equals("ENDPHOTO")){
+            byte[] photoData = Base64.decode(photoString, Base64.DEFAULT);
+            Bitmap bm = BitmapFactory.decodeByteArray(photoData, 0, photoData.length);
+            Log.d(TAG, "++ Photo received " + photoData.length);
+            Drawable draw = new BitmapDrawable(getResources(), bm);
+            displayImageDialog("Photo Received",draw);
+
+        } else if (lastTimerID.equals(timeID)) {
+            photoString+=senz.getAttributes().get("photo");
+        }else {
+            lastTimerID=timeID;
+            photoString=senz.getAttributes().get("photo");
+        }
+        Log.d(TAG, "*** Photo length" + photoString.length()+" "+lastTimerID+" "+timeID);
     }
 
     /**
@@ -449,7 +469,6 @@ public class SwitchListActivity extends Activity {
         // set image
         ImageView imageView = (ImageView) dialog.findViewById(R.id.image_dialog_layout_light_image);
         imageView.setBackground(drawable);
-
         //set ok button
         Button okButton = (Button) dialog.findViewById(R.id.image_dialog_layout_ok_button);
         okButton.setTypeface(typeface);
