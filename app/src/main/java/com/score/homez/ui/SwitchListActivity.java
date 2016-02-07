@@ -103,7 +103,9 @@ public class SwitchListActivity extends Activity {
         setupActionBar();
         popUpSwitchList();
 
+        //set the switches to the last exit stage
         for(Switch aSwitch:switchList){
+            aSwitch.setStatus(aSwitch.getStatus()==1? 0:1);
             doPut(aSwitch);
         }
         //doGet(switchList);
