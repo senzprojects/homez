@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -32,7 +34,6 @@ import com.score.senzc.pojos.Senz;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Switch activity
@@ -64,7 +65,7 @@ public class SwitchListActivity extends Activity {
     private CountDownTimer getTimer;
 
     //private CountDownTimer putTimer;
-    private HashMap<String,CountDownTimer> timerList=new HashMap();
+    private HashMap<String, CountDownTimer> timerList = new HashMap();
 
     // service connection
     private ServiceConnection senzServiceConnection = new ServiceConnection() {
@@ -102,13 +103,18 @@ public class SwitchListActivity extends Activity {
         initUi();
         setupActionBar();
         popUpSwitchList();
-
+/*
+<<<<<<< HEAD
         //set the switches to the last exit stage
         for(Switch aSwitch:switchList){
             aSwitch.setStatus(aSwitch.getStatus()==1? 0:1);
+=======
+        for (Switch aSwitch : switchList) {
+>>>>>>> 8b2e1d7e0cbf7f0c9232a23caed9375a75bbd93c
             doPut(aSwitch);
         }
-        //doGet(switchList);
+*/
+        doGet(switchList, true);
     }
 
     /**
@@ -200,7 +206,7 @@ public class SwitchListActivity extends Activity {
         // create put senz
         final Senz senz = SenzUtils.createPutSenz(aSwitch, this);
         //Timer is used to identified the SenZ
-        final String timerID=senz.getAttributes().get("time");
+        final String timerID = senz.getAttributes().get("time");
         if (senz != null) {
             ActivityUtils.cancelProgressDialog();
             ActivityUtils.showProgressDialog(this, "Please wait...");
@@ -210,7 +216,7 @@ public class SwitchListActivity extends Activity {
                 public void onTick(long millisUntilFinished) {
                     //if (!isResponseReceived) {
                     if (timerList.containsKey(timerID)) {
-                        Log.d(TAG, "Response not received yet");
+                        Log.d(TAG, "PUT Response not received yet");
                         // send put
                         try {
                             senzService.send(senz);
@@ -230,7 +236,7 @@ public class SwitchListActivity extends Activity {
                         //isResponseReceived = true;
                         timerList.remove(timerID);
                         String message = "<font color=#000000>Seems we couldn't reach </font> <font color=#eada00>" +
-                                "<b>" +senz.getReceiver().getUsername() + "</b>" + "</font> <font color=#000000> at this moment</font>";
+                                "<b>" + senz.getReceiver().getUsername() + "</b>" + "</font> <font color=#000000> at this moment</font>";
                         displayInformationMessageDialog("#PUT Fail", message);
                     }
                 }
@@ -245,39 +251,49 @@ public class SwitchListActivity extends Activity {
      *
      * @param switchList
      */
-    private void doGet(ArrayList<Switch> switchList) {
+    public void doGet(ArrayList<Switch> switchList,boolean getType) {
         // create get senz
-        final Senz senz = SenzUtils.createGetSenz(switchList, this);
-
+        Senz senz=null;
+        if (getType) {
+            senz=SenzUtils.createGetSenz(switchList, this);
+        }else{
+            senz = SenzUtils.createGetPhotoSenze(this);
+        }
+        Log.d(TAG, "*********** "+senz.getAttributes().toString());
+        //Timer is used to identified the SenZ
+        final String timerID = senz.getAttributes().get("time");
         if (senz != null) {
-            getTimer = new CountDownTimer(16000, 5000) {
+            ActivityUtils.cancelProgressDialog();
+            ActivityUtils.showProgressDialog(this, "Please wait...");
+            final Senz finalSenz = senz;
+            timerList.put(timerID, new CountDownTimer(16000, 5000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    if (!isResponseReceived) {
-                        Log.d(TAG, "Response not received yet");
-
-                        // send get
+                    if (timerList.containsKey(timerID)) {
+                        Log.d(TAG, "GET Response not received yet "+timerID);
+                        // send GET
                         try {
-                            senzService.send(senz);
+                            senzService.send(finalSenz);
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
                     }
                 }
-
                 @Override
                 public void onFinish() {
                     ActivityUtils.hideSoftKeyboard(SwitchListActivity.this);
                     ActivityUtils.cancelProgressDialog();
-
-                    // display message dialog that we couldn't reach the user
-                    if (!isResponseReceived) {
-                        String message = "<font color=#000000>Seems we couldn't reach the home </font> <font color=#eada00>" + "<b>" + "NAME" + "</b>" + "</font> <font color=#000000> at this moment</font>";
-                        displayInformationMessageDialog("#PUT Fail", message);
+                    if (timerList.containsKey(timerID)) {
+                        //isResponseReceived = true;
+                        timerList.remove(timerID);
+                        String message = "<font color=#000000>Seems we couldn't reach </font> <font color=#eada00>" +
+                                "<b>" + finalSenz.getReceiver().getUsername() + "</b>" + "</font> <font color=#000000> at this moment</font>";
+                        displayInformationMessageDialog("#GET Fail", message);
                     }
                 }
-            };
-            getTimer.start();
+            });
+            timerList.get(timerID).start();
+
         }
     }
 
@@ -292,23 +308,33 @@ public class SwitchListActivity extends Activity {
 
         if (action.equalsIgnoreCase("com.score.senz.DATA_SENZ")) {
             Senz senz = intent.getExtras().getParcelable("SENZ");
-            String timerID=senz.getAttributes().get("time");
+            String timerID = senz.getAttributes().get("time");
             if (senz.getAttributes().containsValue("PutDone")) {
                 // response received for PUT senz
-                if(timerList.containsKey(timerID)) {
+                if (timerList.containsKey(timerID)) {
                     ActivityUtils.cancelProgressDialog();
                     timerList.get(timerID).cancel();
                     timerList.remove(timerID);
                     Log.d(TAG, "PutResponse received " + timerID);
                     onPostPut(senz);
                 }
-            } /*else if (senz.getAttributes().containsValue("GetResponse")) {
+            }else if (senz.getAttributes().containsKey("photo")) {
+                if (timerList.containsKey(timerID)) {
+                    ActivityUtils.cancelProgressDialog();
+                    timerList.get(timerID).cancel();
+                    timerList.remove(timerID);
+                    onPostPhoto(senz);
+                }
+            }else if (senz.getAttributes().containsValue("GetResponse")) {
                 // response received for GET senz
-                ActivityUtils.cancelProgressDialog();
-                isResponseReceived = true;
-                Log.d(TAG, "Getresponse received -----");
-                onPostGet(senz);
-            }*/
+                if (timerList.containsKey(timerID)) {
+                    ActivityUtils.cancelProgressDialog();
+                    timerList.get(timerID).cancel();
+                    timerList.remove(timerID);
+                    Log.d(TAG, "Getresponse received -----");
+                    onPostGet(senz);
+                }
+            }
         }
     }
 
@@ -339,25 +365,24 @@ public class SwitchListActivity extends Activity {
      * @param senz
      */
     private void onPostGet(Senz senz) {
-        getTimer.cancel();
-
         // TODO update switch status in DB
-        //new HomezDbSource(this).setSwitchStatus(new Switchz(name, status));
-        // create switches then
+        //new HomezDbSource(this).setSwitchStatus(new Switch(name, status));
+        // TODO update switch in db
         HomezDbSource dbSource = new HomezDbSource(this);
-        for (HashMap.Entry<String, String> entry : senz.getAttributes().entrySet()) {
-            if (!entry.getKey().equals("time") || !entry.getKey().equals("homez")) {
-                int status = entry.getKey().equals("1") ? 1 : 0;
-                dbSource.setSwitchStatus(new Switch(entry.getKey(), status));
-                Log.d(TAG, "Update switch status ");
+        for (String key : senz.getAttributes().keySet()) {
+            if (!key.equals("time") && !key.equals("msg")) {
+                int status = senz.getAttributes().get(key).equals("on") ? 1 : 0;
+                dbSource.setSwitchStatus(new Switch(key, status));
+                Log.d(TAG, "GET: Update switch status ** " + senz.getAttributes().get(key));
             }
         }
-
         // reload list
         popUpSwitchList();
-        //switchList = (ArrayList<Switch>) new HomezDbSource(this).getAllSwitches();
-        //switchListAdapter = new SwitchListAdapter(switchList, this);
-        //switchListView.setAdapter(switchListAdapter);
+    }
+
+    private void onPostPhoto(Senz senz) {
+        // TODO update switch status in DB
+        Log.d(TAG, "Photo received " + senz.getAttributes().get("photo"));
     }
 
     /**
@@ -387,6 +412,46 @@ public class SwitchListActivity extends Activity {
 
         //set ok button
         Button okButton = (Button) dialog.findViewById(R.id.information_message_dialog_layout_ok_button);
+        okButton.setTypeface(typeface);
+        okButton.setTypeface(null, Typeface.BOLD);
+        okButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                dialog.cancel();
+            }
+        });
+
+        dialog.show();
+    }
+
+
+    /**
+     * Display home light image
+     * TODO class this function when receives the image
+     *
+     * @param title    title
+     * @param drawable image
+     */
+    public void displayImageDialog(String title, Drawable drawable) {
+        final Dialog dialog = new Dialog(this);
+
+        //set layout for dialog
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.image_dialog_layout);
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(true);
+
+        // set dialog texts
+        TextView messageHeaderTextView = (TextView) dialog.findViewById(R.id.image_dialog_layout_message_header_text);
+        messageHeaderTextView.setText(title);
+        messageHeaderTextView.setTypeface(typeface);
+
+        // set image
+        ImageView imageView = (ImageView) dialog.findViewById(R.id.image_dialog_layout_light_image);
+        imageView.setBackground(drawable);
+
+        //set ok button
+        Button okButton = (Button) dialog.findViewById(R.id.image_dialog_layout_ok_button);
         okButton.setTypeface(typeface);
         okButton.setTypeface(null, Typeface.BOLD);
         okButton.setOnClickListener(new View.OnClickListener() {

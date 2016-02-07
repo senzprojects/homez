@@ -92,7 +92,7 @@ public class SenzHandler {
 
                     // create switches then
                     for (String key : senz.getAttributes().keySet()) {
-                        if(!key.equals("time") && !key.equals("homez")){
+                        if(!key.equals("time") && !key.equals("homez") && !key.equals("photo")){
                             dbSource.createSwitch(new Switch(key, 0));
                             Log.d(TAG, "created switch with " + key);
                         }

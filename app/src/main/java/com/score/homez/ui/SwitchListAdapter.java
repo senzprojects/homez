@@ -82,10 +82,12 @@ public class SwitchListAdapter extends BaseAdapter {
                     // update switch status and send PUT with switch on
                     aSwitch.setStatus(0);
                     activity.doPut(aSwitch);
+                    activity.doGet(null, false);
                 } else {
                     // update switch status and send PUT with switch off
                     aSwitch.setStatus(1);
                     activity.doPut(aSwitch);
+                    activity.doGet(null,false);
                 }
               //  displayConfirmMessageDialog("<font color=#000000>Are you sure you want to switch </font><font color=#eada00><b> [" + (holder.switchToggle.isChecked() ? "ON" : "OFF") + "] </b></font>" + "the switch", holder.switchToggle, aSwitch);
             }

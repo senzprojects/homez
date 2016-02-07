@@ -1,6 +1,7 @@
 package com.score.homez.utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.score.homez.db.HomezDbSource;
 import com.score.homez.exceptions.NoUserException;
@@ -74,11 +75,11 @@ public class SenzUtils {
     /**
      * Create GET senz to find status of the switches
      *
-     * @param switchList switch list
+     * @param ArrayList<Switch> switchList
      * @param context    context
      * @return senz
      */
-    public static Senz createGetSenz(List<Switch> sw,Context context) {
+    public static Senz createGetSenz(ArrayList<Switch> switchList,Context context) {
         try {
             // get receiver
             User receiver = PreferenceUtils.getUser(context);
@@ -88,14 +89,38 @@ public class SenzUtils {
             SenzTypeEnum senzType = SenzTypeEnum.GET;
 
             HashMap<String, String> senzAttributes = new HashMap<>();
-            if (!sw.isEmpty())
-                for(Switch s:sw) senzAttributes.put(s.getName(),"");
+            if (!switchList.isEmpty())
+                for(Switch s:switchList) senzAttributes.put(s.getName(),"");
             senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 10)).toString());
             return new Senz(id, signature, senzType, null, receiver, senzAttributes);
         } catch (NoUserException e) {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+
+    /**
+     * Create GET senz to find get a photo
+     * @param context    context
+     * @return senz
+     */
+    public static Senz createGetPhotoSenze(Context context) {
+        try {
+            // get receiver
+            User receiver = PreferenceUtils.getUser(context);
+            // new senz
+            String id = "_ID";
+            String signature = "_SIGNATURE";
+            SenzTypeEnum senzType = SenzTypeEnum.GET;
+            HashMap<String, String> senzAttributes = new HashMap<>();
+            senzAttributes.put("photo","");
+            senzAttributes.put("time", ((Long) (System.currentTimeMillis() / 10)).toString());
+            return new Senz(id, signature, senzType, null, receiver, senzAttributes);
+        } catch (NoUserException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }
